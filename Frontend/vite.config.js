@@ -10,13 +10,16 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
-    host: '0.0.0.0',
+    host: true,
     port: process.env.PORT || 8000,
-    allowedHosts: 'all',
+    strictPort: false,
+    hmr: {
+      clientPort: process.env.PORT || 8000,
+    },
   },
   preview: {
-    host: '0.0.0.0',
+    host: true,
     port: process.env.PORT || 8000,
-    allowedHosts: 'all',
+    strictPort: false,
   },
 })
