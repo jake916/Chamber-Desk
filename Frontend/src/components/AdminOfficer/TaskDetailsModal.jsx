@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Calendar, User, Users, Briefcase, AlertCircle, CheckSquare, Plus, Trash2, Edit, Check } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const TaskDetailsModal = ({ task, onClose, onUpdate, onDelete, currentUserId }) => {
     const [newSubtask, setNewSubtask] = useState('');

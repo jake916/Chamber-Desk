@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { UserPlus, Search, Filter, Users, UserCheck, UserX } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
+import API_BASE_URL from '../../config/api';
 
 const ClientManagement = () => {
     const navigate = useNavigate();
@@ -19,7 +20,7 @@ const ClientManagement = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/clients', {
+            const response = await fetch(`${API_BASE_URL}/api/clients`, {
                 headers: {
                     'x-auth-token': token
                 }

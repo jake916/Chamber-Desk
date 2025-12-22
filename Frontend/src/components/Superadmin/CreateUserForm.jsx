@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { UserPlus, User, UserCog, Shield, Briefcase, X, Eye, EyeOff } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 const CreateUserForm = ({ onSuccess, onCancel }) => {
     const [formData, setFormData] = useState({
@@ -23,7 +24,7 @@ const CreateUserForm = ({ onSuccess, onCancel }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/auth/create-user', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/create-user`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

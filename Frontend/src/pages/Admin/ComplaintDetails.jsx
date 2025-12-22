@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, MessageCircle, AlertCircle, User as UserIcon } from 'lucide-react';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ComplaintDetails = () => {
     const { id } = useParams();

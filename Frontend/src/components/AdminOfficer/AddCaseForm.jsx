@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, Upload, Plus, X } from 'lucide-react';
 import Alert from '../Alert';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const AddCaseForm = () => {
     const navigate = useNavigate();
@@ -79,7 +79,7 @@ const AddCaseForm = () => {
     const fetchAllClients = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/clients', {
+            const response = await fetch(`${API_BASE_URL}/api/clients`, {
                 headers: { 'x-auth-token': token }
             });
 
@@ -163,7 +163,7 @@ const AddCaseForm = () => {
                 ...formData
             };
 
-            const response = await fetch(`${API_BASE_URL}/api/cases', {
+            const response = await fetch(`${API_BASE_URL}/api/cases`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

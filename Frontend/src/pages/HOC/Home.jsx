@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Briefcase, DollarSign, FileText, Ticket, Upload, Bell, Users, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config/api';
 
 const Home = () => {
     const navigate = useNavigate();
@@ -34,7 +35,7 @@ const Home = () => {
             const userId = user.id;
 
             // Clients
-            const clientsRes = await fetch(`${API_BASE_URL}/api/clients', {
+            const clientsRes = await fetch(`${API_BASE_URL}/api/clients`, {
                 headers: { 'x-auth-token': token }
             });
             if (clientsRes.ok) {
@@ -44,7 +45,7 @@ const Home = () => {
             }
 
             // Cases - Only fetch cases assigned to this HOC
-            const casesRes = await fetch(`${API_BASE_URL}/api/cases', {
+            const casesRes = await fetch(`${API_BASE_URL}/api/cases`, {
                 headers: { 'x-auth-token': token }
             });
             if (casesRes.ok) {
@@ -60,7 +61,7 @@ const Home = () => {
             }
 
             // Fund Requisitions
-            const fundsRes = await fetch(`${API_BASE_URL}/api/funds', {
+            const fundsRes = await fetch(`${API_BASE_URL}/api/funds`, {
                 headers: { 'x-auth-token': token }
             });
             if (fundsRes.ok) {
@@ -70,7 +71,7 @@ const Home = () => {
             }
 
             // Documents - Filter by uploadedBy or sharedWith
-            const docsRes = await fetch(`${API_BASE_URL}/api/documents', {
+            const docsRes = await fetch(`${API_BASE_URL}/api/documents`, {
                 headers: { 'x-auth-token': token }
             });
             if (docsRes.ok) {
@@ -83,7 +84,7 @@ const Home = () => {
             }
 
             // Support Tickets
-            const ticketsRes = await fetch(`${API_BASE_URL}/api/support', {
+            const ticketsRes = await fetch(`${API_BASE_URL}/api/support`, {
                 headers: { 'x-auth-token': token }
             });
             if (ticketsRes.ok) {
@@ -97,7 +98,7 @@ const Home = () => {
             }
 
             // Notifications
-            const notifRes = await fetch(`${API_BASE_URL}/api/notifications', {
+            const notifRes = await fetch(`${API_BASE_URL}/api/notifications`, {
                 headers: { 'x-auth-token': token }
             });
             if (notifRes.ok) {

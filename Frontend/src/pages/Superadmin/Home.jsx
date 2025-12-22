@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Users, Briefcase, Ticket, Bell, UserPlus, Shield, MessageSquare, BellRing, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config/api';
 
 const StatCard = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
@@ -64,13 +65,13 @@ const Home = () => {
                 const token = localStorage.getItem('token');
 
                 // Fetch users
-                const usersResponse = await fetch(`${API_BASE_URL}/api/auth/users', {
+                const usersResponse = await fetch(`${API_BASE_URL}/api/auth/users`, {
                     headers: { 'x-auth-token': token }
                 });
                 const users = await usersResponse.json();
 
                 // Fetch support tickets
-                const ticketsResponse = await fetch(`${API_BASE_URL}/api/support/all', {
+                const ticketsResponse = await fetch(`${API_BASE_URL}/api/support/all`, {
                     headers: { 'x-auth-token': token }
                 });
                 const tickets = await ticketsResponse.json();
@@ -165,7 +166,7 @@ const Home = () => {
                 }
 
                 // Fetch notifications
-                const notificationsResponse = await fetch(`${API_BASE_URL}/api/notifications', {
+                const notificationsResponse = await fetch(`${API_BASE_URL}/api/notifications`, {
                     headers: { 'x-auth-token': token }
                 });
                 const notifications = await notificationsResponse.json();

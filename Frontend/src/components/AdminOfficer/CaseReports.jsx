@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Send, Clock, User, FileText, AlertCircle } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const CaseReports = ({ caseId }) => {
     const [reports, setReports] = useState([]);

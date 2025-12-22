@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Send, Paperclip, Download, User, Calendar } from 'lucide-react';
 import axios from 'axios';
-import API_BASE_URL from '../../config/api';
+import API_BASE_URL from '../config/api';
 
 const SupportTicketDetail = ({ ticket, isOpen, onClose, onUpdate, userRole }) => {
     const [replyMessage, setReplyMessage] = useState('');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Bell, Check, Trash2, Filter } from 'lucide-react';
 import axios from 'axios';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const SuperadminNotifications = () => {
     const [notifications, setNotifications] = useState([]);
@@ -15,7 +15,7 @@ const SuperadminNotifications = () => {
     const fetchNotifications = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/notifications', {
+            const res = await axios.get(`${API_BASE_URL}/api/notifications`, {
                 headers: { 'x-auth-token': token }
             });
             setNotifications(res.data);
@@ -43,7 +43,7 @@ const SuperadminNotifications = () => {
     const handleMarkAllAsRead = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${API_BASE_URL}/api/notifications/read-all', {}, {
+            await axios.put(`${API_BASE_URL}/api/notifications/read-all`, {}, {
                 headers: { 'x-auth-token': token }
             });
             setNotifications(notifications.map(n => ({ ...n, read: true })));
@@ -150,8 +150,8 @@ const SuperadminNotifications = () => {
                 <button
                     onClick={() => setFilter('all')}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'all'
-                            ? 'bg-orange-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-orange-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                 >
                     All ({notifications.length})
@@ -159,8 +159,8 @@ const SuperadminNotifications = () => {
                 <button
                     onClick={() => setFilter('unread')}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'unread'
-                            ? 'bg-orange-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-orange-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                 >
                     Unread ({unreadCount})
@@ -168,8 +168,8 @@ const SuperadminNotifications = () => {
                 <button
                     onClick={() => setFilter('user')}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'user'
-                            ? 'bg-orange-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-orange-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                 >
                     User Management
@@ -177,8 +177,8 @@ const SuperadminNotifications = () => {
                 <button
                     onClick={() => setFilter('ticket')}
                     className={`px-4 py-2 rounded-lg font-medium transition-colors ${filter === 'ticket'
-                            ? 'bg-orange-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-orange-600 text-white'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                 >
                     Support Tickets
@@ -201,8 +201,8 @@ const SuperadminNotifications = () => {
                         <div
                             key={notification._id}
                             className={`bg-white rounded-xl shadow-sm border transition-all ${notification.read
-                                    ? 'border-gray-100'
-                                    : 'border-orange-200 bg-orange-50/30'
+                                ? 'border-gray-100'
+                                : 'border-orange-200 bg-orange-50/30'
                                 }`}
                         >
                             <div className="p-4 flex items-start gap-4">

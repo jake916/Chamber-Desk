@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, AlertCircle } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 const AddTaskModal = ({ isOpen, onClose, onSuccess, initialStatus = 'To-Do' }) => {
     const [taskUsers, setTaskUsers] = useState([]);
@@ -32,8 +33,8 @@ const AddTaskModal = ({ isOpen, onClose, onSuccess, initialStatus = 'To-Do' }) =
         try {
             const token = localStorage.getItem('token');
             const [casesRes, usersRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/api/cases', { headers: { 'x-auth-token': token } }),
-                fetch(`${API_BASE_URL}/api/users/selectable', { headers: { 'x-auth-token': token } })
+                fetch(`${API_BASE_URL}/api/cases`, { headers: { 'x-auth-token': token } }),
+                fetch(`${API_BASE_URL}/api/users/selectable`, { headers: { 'x-auth-token': token } })
             ]);
 
             if (casesRes.ok) {
@@ -61,7 +62,7 @@ const AddTaskModal = ({ isOpen, onClose, onSuccess, initialStatus = 'To-Do' }) =
                 caseId: formData.hasCase === 'yes' ? formData.caseId : null
             };
 
-            const response = await fetch(`${API_BASE_URL}/api/tasks', {
+            const response = await fetch(`${API_BASE_URL}/api/tasks`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -156,7 +157,7 @@ const AddTaskModal = ({ isOpen, onClose, onSuccess, initialStatus = 'To-Do' }) =
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {message.text && (
-                        <div className={`p-3 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        <div className={`p - 3 rounded - lg text - sm ${ message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' }`}>
                             {message.text}
                         </div>
                     )}

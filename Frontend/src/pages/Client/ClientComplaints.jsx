@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { MessageSquare, Plus, XCircle, Send } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ClientComplaints = () => {
     const { shareToken } = useOutletContext();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { User, Mail, Phone, MapPin, Building, Calendar, Briefcase, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import LoadingSpinner from './LoadingSpinner';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const EditClientForm = () => {
     const navigate = useNavigate();

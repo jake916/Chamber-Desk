@@ -2,6 +2,7 @@ import { Home, FileText, DollarSign, FolderOpen, Bell, LogOut, Headphones, Users
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import API_BASE_URL from '../../config/api';
 
 const HOCSidebar = () => {
     const location = useLocation();
@@ -17,7 +18,7 @@ const HOCSidebar = () => {
     const fetchUnreadCount = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/notifications', {
+            const res = await axios.get(`${API_BASE_URL}/api/notifications`, {
                 headers: { 'x-auth-token': token }
             });
             const unread = res.data.filter(n => !n.read).length;

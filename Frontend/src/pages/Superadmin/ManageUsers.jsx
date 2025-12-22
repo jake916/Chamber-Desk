@@ -4,6 +4,7 @@ import CreateUserForm from '../../components/Superadmin/CreateUserForm';
 import EditUserForm from '../../components/Superadmin/EditUserForm';
 import ChangePasswordForm from '../../components/Superadmin/ChangePasswordForm';
 import DeleteUserModal from '../../components/Superadmin/DeleteUserModal';
+import API_BASE_URL from '../../config/api';
 
 const ManageUsers = () => {
     const [users, setUsers] = useState([]);
@@ -39,7 +40,7 @@ const ManageUsers = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/auth/users', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/users`, {
                 headers: {
                     'x-auth-token': token
                 }

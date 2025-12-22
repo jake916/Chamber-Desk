@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, CheckCircle, XCircle, DollarSign, Users, Briefcase, AlertCircle, UserCheck, Calendar, ArrowRight, CheckSquare, MessageSquare, UserPlus, Trash2 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const Notifications = () => {
     const navigate = useNavigate();
@@ -38,7 +38,7 @@ const Notifications = () => {
     const fetchDatesWithUnread = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/notifications/unread-dates', {
+            const res = await axios.get(`${API_BASE_URL}/api/notifications/unread-dates`, {
                 headers: { 'x-auth-token': token }
             });
             setDatesWithUnread(res.data.dates || []);
@@ -65,7 +65,7 @@ const Notifications = () => {
     const markAllAsRead = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${API_BASE_URL}/api/notifications/read-all', {}, {
+            await axios.put(`${API_BASE_URL}/api/notifications/read-all`, {}, {
                 headers: { 'x-auth-token': token }
             });
 

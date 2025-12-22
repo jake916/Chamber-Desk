@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, CheckCircle, AlertCircle, Plus, X } from 'lucide-react';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const EditCaseForm = () => {
     const { id } = useParams();

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, CheckCircle, XCircle, DollarSign, Users, Briefcase, AlertCircle, UserCheck, Calendar, ArrowRight } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const HOCNotifications = () => {
     const navigate = useNavigate();
@@ -47,7 +47,7 @@ const HOCNotifications = () => {
     const markAllAsRead = async () => {
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${API_BASE_URL}/api/notifications/read-all', {}, {
+            await axios.put(`${API_BASE_URL}/api/notifications/read-all`, {}, {
                 headers: { 'x-auth-token': token }
             });
 

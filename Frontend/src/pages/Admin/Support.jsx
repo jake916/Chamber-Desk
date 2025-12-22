@@ -4,7 +4,7 @@ import axios from 'axios';
 import DocumentSelectorDrawer from '../../components/DocumentSelectorDrawer';
 import SupportTicketDetail from '../../components/SupportTicketDetail';
 import Alert from '../../components/Alert';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const Support = () => {
     const [activeView, setActiveView] = useState('menu');
@@ -31,7 +31,7 @@ const Support = () => {
     const fetchTickets = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/support', {
+            const res = await axios.get(`${API_BASE_URL}/api/support`, {
                 headers: { 'x-auth-token': token }
             });
             setTickets(res.data);
@@ -78,7 +78,7 @@ const Support = () => {
                 attachments: selectedDocuments.map(doc => doc._id)
             };
 
-            await axios.post(`${API_BASE_URL}/api/support', payload, {
+            await axios.post(`${API_BASE_URL}/api/support`, payload, {
                 headers: { 'x-auth-token': token }
             });
 

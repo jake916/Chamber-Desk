@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, MessageCircle, User as UserIcon, FileText } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const HOCReportThread = () => {
     const { caseId, reportId } = useParams();

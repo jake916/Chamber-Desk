@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { User, Mail, Phone, MapPin, Building, Calendar, Briefcase, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config/api';
 
 const AddClientForm = () => {
     const navigate = useNavigate();
@@ -121,7 +122,7 @@ const AddClientForm = () => {
                 };
             }
 
-            const response = await fetch(`${API_BASE_URL}/api/clients', {
+            const response = await fetch(`${API_BASE_URL}/api/clients`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

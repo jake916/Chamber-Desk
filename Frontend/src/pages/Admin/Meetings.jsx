@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, Plus, Trash2, ChevronLeft, ChevronRight, X, Users, MapPin, Video, Link as LinkIcon, Search, User, AlertTriangle, Pencil } from 'lucide-react';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const Meetings = () => {
     const location = useLocation();
@@ -78,7 +78,7 @@ const Meetings = () => {
     const fetchMeetings = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/meetings', {
+            const response = await fetch(`${API_BASE_URL}/api/meetings`, {
                 headers: { 'x-auth-token': token }
             });
             if (response.ok) {
@@ -95,7 +95,7 @@ const Meetings = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/users/selectable', {
+            const response = await fetch(`${API_BASE_URL}/api/users/selectable`, {
                 headers: {
                     'x-auth-token': token
                 }
@@ -111,7 +111,7 @@ const Meetings = () => {
     const fetchClients = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/clients', {
+            const response = await fetch(`${API_BASE_URL}/api/clients`, {
                 headers: {
                     'x-auth-token': token
                 }
@@ -227,7 +227,7 @@ const Meetings = () => {
     const generateZohoLink = async (meetingData) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/meetings/generate-zoho-link', {
+            const response = await fetch(`${API_BASE_URL}/api/meetings/generate-zoho-link`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -307,7 +307,7 @@ const Meetings = () => {
             const token = localStorage.getItem('token');
             const url = isEditing
                 ? `${API_BASE_URL}/api/meetings/${editingId}`
-                : `${API_BASE_URL}/api/meetings';
+                : `${API_BASE_URL}/api/meetings`;
 
             const method = isEditing ? 'PUT' : 'POST';
 

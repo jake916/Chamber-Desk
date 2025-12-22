@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DollarSign, User, Calendar, CheckCircle, XCircle, Clock, Send, Plus, Search, Filter, Eye } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const FundRequisitionList = () => {
     const navigate = useNavigate();
@@ -36,7 +36,7 @@ const FundRequisitionList = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/funds', {
+            const response = await fetch(`${API_BASE_URL}/api/funds`, {
                 headers: { 'x-auth-token': token }
             });
 
@@ -54,7 +54,7 @@ const FundRequisitionList = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/auth/users', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/users`, {
                 headers: { 'x-auth-token': token }
             });
 
@@ -75,7 +75,7 @@ const FundRequisitionList = () => {
     const fetchManagers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/auth/users', {
+            const response = await fetch(`${API_BASE_URL}/api/auth/users`, {
                 headers: { 'x-auth-token': token }
             });
 

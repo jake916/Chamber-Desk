@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const Documents = () => {
     const location = useLocation();
@@ -65,7 +65,7 @@ const Documents = () => {
                 setLoading(false);
                 return;
             }
-            const res = await axios.get(`${API_BASE_URL}/api/documents', {
+            const res = await axios.get(`${API_BASE_URL}/api/documents`, {
                 headers: { 'x-auth-token': token }
             });
             setDocuments(res.data);
@@ -79,7 +79,7 @@ const Documents = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/users', {
+            const res = await axios.get(`${API_BASE_URL}/api/users`, {
                 headers: { 'x-auth-token': token }
             });
             setUsers(res.data);
@@ -91,7 +91,7 @@ const Documents = () => {
     const fetchCases = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/cases', {
+            const res = await axios.get(`${API_BASE_URL}/api/cases`, {
                 headers: { 'x-auth-token': token }
             });
             setCases(res.data);
@@ -157,7 +157,7 @@ const Documents = () => {
             formData.append('file', file);
 
             try {
-                await axios.post(`${API_BASE_URL}/api/documents/upload', formData, {
+                await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
                     headers: {
                         'x-auth-token': token,
                         'Content-Type': 'multipart/form-data'

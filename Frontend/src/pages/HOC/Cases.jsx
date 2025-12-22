@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Filter, FolderOpen, Clock, CheckCircle, XCircle, Award, AlertCircle, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config/api';
 
 const Cases = () => {
     const navigate = useNavigate();
@@ -20,7 +21,7 @@ const Cases = () => {
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             const userId = user.id;
 
-            const response = await fetch(`${API_BASE_URL}/api/cases', {
+            const response = await fetch(`${API_BASE_URL}/api/cases`, {
                 headers: {
                     'x-auth-token': token
                 }

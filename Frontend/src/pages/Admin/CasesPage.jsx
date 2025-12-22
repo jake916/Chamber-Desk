@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, FolderOpen, Clock, CheckCircle, XCircle, Award, AlertCircle, UserCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
+import API_BASE_URL from '../../config/api';
 
 const CasesPage = () => {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ const CasesPage = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/cases', {
+            const response = await fetch(`${API_BASE_URL}/api/cases`, {
                 headers: {
                     'x-auth-token': token
                 }

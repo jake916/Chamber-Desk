@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Key, Save, X, Eye, EyeOff } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ChangePasswordForm = ({ user, onSuccess, onCancel }) => {
     const [password, setPassword] = useState('');

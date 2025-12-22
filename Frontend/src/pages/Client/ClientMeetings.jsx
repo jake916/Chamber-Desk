@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { Calendar as CalendarIcon, Clock, Plus, ChevronLeft, ChevronRight, X, MapPin, Video, Search, Pencil, AlertCircle, Trash2 } from 'lucide-react';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ClientMeetings = () => {
     const { shareToken, clientData } = useOutletContext();

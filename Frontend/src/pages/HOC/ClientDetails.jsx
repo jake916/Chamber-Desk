@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config/api';
 import {
-import API_BASE_URL from '../../../config/api';
     ArrowLeft,
     User, Mail, Phone, MapPin, Building, Calendar,
     Briefcase, Users, FileText, AlertCircle, Plus,

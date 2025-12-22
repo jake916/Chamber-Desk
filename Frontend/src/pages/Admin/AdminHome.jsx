@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
 import ScheduleMeetingModal from '../../components/Modals/ScheduleMeetingModal';
 import AddTaskModal from '../../components/Modals/AddTaskModal';
+import API_BASE_URL from '../../config/api';
 
 const AdminHome = () => {
     const navigate = useNavigate();
@@ -49,7 +50,7 @@ const AdminHome = () => {
         try {
             const token = localStorage.getItem('token');
             // Clients
-            const clientsRes = await fetch(`${API_BASE_URL}/api/clients', { headers: { 'x-auth-token': token } });
+            const clientsRes = await fetch(`${API_BASE_URL}/api/clients`, { headers: { 'x-auth-token': token } });
             if (clientsRes.ok) {
                 const clients = await clientsRes.json();
                 const activeClients = clients.filter(c => c.status === 'Active').length;
@@ -57,14 +58,14 @@ const AdminHome = () => {
                 setRecentClients(clients.slice(0, 5));
             }
             // Funds
-            const fundsRes = await fetch(`${API_BASE_URL}/api/funds', { headers: { 'x-auth-token': token } });
+            const fundsRes = await fetch(`${API_BASE_URL}/api/funds`, { headers: { 'x-auth-token': token } });
             if (fundsRes.ok) {
                 const funds = await fundsRes.json();
                 setStats(prev => ({ ...prev, totalFunds: funds.length }));
                 setRecentRequisitions(funds.slice(0, 5));
             }
             // Cases
-            const casesRes = await fetch(`${API_BASE_URL}/api/cases', { headers: { 'x-auth-token': token } });
+            const casesRes = await fetch(`${API_BASE_URL}/api/cases`, { headers: { 'x-auth-token': token } });
             if (casesRes.ok) {
                 const cases = await casesRes.json();
                 const activeCases = cases.filter(c => c.status === 'Open').length;
@@ -72,13 +73,13 @@ const AdminHome = () => {
                 setRecentCases(cases.slice(0, 5));
             }
             // Documents
-            const docsRes = await fetch(`${API_BASE_URL}/api/documents', { headers: { 'x-auth-token': token } });
+            const docsRes = await fetch(`${API_BASE_URL}/api/documents`, { headers: { 'x-auth-token': token } });
             if (docsRes.ok) {
                 const docs = await docsRes.json();
                 setStats(prev => ({ ...prev, totalDocuments: docs.length }));
             }
             // Notifications
-            const notifRes = await fetch(`${API_BASE_URL}/api/notifications', { headers: { 'x-auth-token': token } });
+            const notifRes = await fetch(`${API_BASE_URL}/api/notifications`, { headers: { 'x-auth-token': token } });
             if (notifRes.ok) {
                 const notifications = await notifRes.json();
                 setRecentNotifications(notifications.slice(0, 5));
@@ -86,13 +87,13 @@ const AdminHome = () => {
                 setRecentNotifications([]);
             }
             // Unread Notification Count
-            const unreadRes = await fetch(`${API_BASE_URL}/api/notifications/unread-count', { headers: { 'x-auth-token': token } });
+            const unreadRes = await fetch(`${API_BASE_URL}/api/notifications/unread-count`, { headers: { 'x-auth-token': token } });
             if (unreadRes.ok) {
                 const unreadData = await unreadRes.json();
                 setUnreadCount(unreadData.count || 0);
             }
             // Support Tickets
-            const ticketsRes = await fetch(`${API_BASE_URL}/api/support', { headers: { 'x-auth-token': token } });
+            const ticketsRes = await fetch(`${API_BASE_URL}/api/support`, { headers: { 'x-auth-token': token } });
             if (ticketsRes.ok) {
                 const tickets = await ticketsRes.json();
                 setStats(prev => ({ ...prev, totalTickets: tickets.length }));
@@ -103,7 +104,7 @@ const AdminHome = () => {
                 setRecentTickets({ complaints, featureRequests });
             }
             // Upcoming Meetings
-            const meetingsRes = await fetch(`${API_BASE_URL}/api/meetings', { headers: { 'x-auth-token': token } });
+            const meetingsRes = await fetch(`${API_BASE_URL}/api/meetings`, { headers: { 'x-auth-token': token } });
             if (meetingsRes.ok) {
                 const meetings = await meetingsRes.json();
                 const now = new Date();
@@ -114,13 +115,13 @@ const AdminHome = () => {
                 setUpcomingMeetings(upcoming);
             }
             // Recent Broadcasts
-            const broadcastsRes = await fetch(`${API_BASE_URL}/api/broadcasts', { headers: { 'x-auth-token': token } });
+            const broadcastsRes = await fetch(`${API_BASE_URL}/api/broadcasts`, { headers: { 'x-auth-token': token } });
             if (broadcastsRes.ok) {
                 const broadcasts = await broadcastsRes.json();
                 setRecentBroadcasts(broadcasts.slice(0, 5));
             }
             // My Tasks (close to due date)
-            const tasksRes = await fetch(`${API_BASE_URL}/api/tasks/my-tasks', { headers: { 'x-auth-token': token } });
+            const tasksRes = await fetch(`${API_BASE_URL}/api/tasks/my-tasks`, { headers: { 'x-auth-token': token } });
             if (tasksRes.ok) {
                 const tasks = await tasksRes.json();
                 const now = new Date();
@@ -684,7 +685,7 @@ const AdminHome = () => {
                 onClose={() => setShowMeetingModal(false)}
                 onSuccess={() => {
                     // Optionally refresh data or show a notification
-                    }}
+                }}
             />
 
             <AddTaskModal
@@ -692,7 +693,7 @@ const AdminHome = () => {
                 onClose={() => setShowTaskModal(false)}
                 onSuccess={() => {
                     // Optionally refresh data or show a notification
-                    }}
+                }}
             />
 
             {/* Meeting Details Modal */}

@@ -4,7 +4,7 @@ import { AlertCircle } from 'lucide-react';
 import ClientAuthSetup from '../../components/ClientPortal/ClientAuthSetup';
 import ClientAuthLogin from '../../components/ClientPortal/ClientAuthLogin';
 import ClientPortalSidebar from '../../components/ClientPortal/ClientPortalSidebar';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ClientPortalLayout = () => {
     const { shareToken } = useParams();

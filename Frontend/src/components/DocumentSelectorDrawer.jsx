@@ -4,6 +4,7 @@ import {
     File, Video, Music, Folder
 } from 'lucide-react';
 import axios from 'axios';
+import API_BASE_URL from '../config/api';
 
 const DocumentSelectorDrawer = ({ isOpen, onClose, onSelectDocuments, caseId, actionLabel }) => {
     const [documents, setDocuments] = useState([]);
@@ -25,7 +26,7 @@ const DocumentSelectorDrawer = ({ isOpen, onClose, onSelectDocuments, caseId, ac
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/documents', {
+            const res = await axios.get(`${API_BASE_URL}/api/documents`, {
                 headers: { 'x-auth-token': token }
             });
             setDocuments(res.data);
@@ -92,7 +93,7 @@ const DocumentSelectorDrawer = ({ isOpen, onClose, onSelectDocuments, caseId, ac
             }
 
             try {
-                await axios.post(`${API_BASE_URL}/api/documents/upload', formData, {
+                await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
                     headers: {
                         'x-auth-token': token,
                         'Content-Type': 'multipart/form-data'

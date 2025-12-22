@@ -11,7 +11,7 @@ import CaseReports from '../../components/AdminOfficer/CaseReports';
 import DocumentSelectorDrawer from '../../components/DocumentSelectorDrawer';
 import ShareCaseLinkModal from '../../components/AdminOfficer/ShareCaseLinkModal';
 import ClientReportModal from '../../components/AdminOfficer/ClientReportModal';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const CaseDetails = () => {
     const { id } = useParams();
@@ -137,7 +137,7 @@ const CaseDetails = () => {
     const fetchLawyers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/users/lawyers', {
+            const response = await fetch(`${API_BASE_URL}/api/users/lawyers`, {
                 headers: { 'x-auth-token': token }
             });
 

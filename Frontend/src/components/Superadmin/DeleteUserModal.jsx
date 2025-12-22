@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2, AlertTriangle, X } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const DeleteUserModal = ({ user, onSuccess, onCancel }) => {
     const [confirmationText, setConfirmationText] = useState('');

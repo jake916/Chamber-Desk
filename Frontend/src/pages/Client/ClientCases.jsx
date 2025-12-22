@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useOutletContext, useNavigate } from 'react-router-dom';
 import { Briefcase, Calendar, FileText, Search, CheckCircle, Clock, AlertCircle, Award, XCircle } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ClientCases = () => {
     const { shareToken } = useOutletContext();

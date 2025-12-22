@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Menu, X, Bell } from 'lucide-react';
 import AdminSidebar from '../../components/AdminOfficer/AdminSidebar';
+import API_BASE_URL from '../../config/api';
 
 const AdminDashboard = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -17,7 +18,7 @@ const AdminDashboard = () => {
     const fetchUnreadCount = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/notifications/unread-count', {
+            const res = await fetch(`${API_BASE_URL}/api/notifications/unread-count`, {
                 headers: { 'x-auth-token': token }
             });
             if (res.ok) {

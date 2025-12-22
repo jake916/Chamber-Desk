@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { CheckSquare, Plus, Calendar, User, Briefcase, Clock, AlertCircle, X, Search } from 'lucide-react';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
 import AddTaskModal from '../../components/Modals/AddTaskModal';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 
 const Tasks = () => {

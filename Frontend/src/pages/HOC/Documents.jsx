@@ -6,7 +6,7 @@ import {
     Video, Music, PieChart, Users, FileDigit, CheckCircle, AlertCircle, FolderPlus
 } from 'lucide-react';
 import axios from 'axios';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const HOCDocuments = () => {
     const [documents, setDocuments] = useState([]);
@@ -56,7 +56,7 @@ const HOCDocuments = () => {
                 setLoading(false);
                 return;
             }
-            const res = await axios.get(`${API_BASE_URL}/api/documents', {
+            const res = await axios.get(`${API_BASE_URL}/api/documents`, {
                 headers: { 'x-auth-token': token }
             });
             setDocuments(res.data);
@@ -70,7 +70,7 @@ const HOCDocuments = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`${API_BASE_URL}/api/users', {
+            const res = await axios.get(`${API_BASE_URL}/api/users`, {
                 headers: { 'x-auth-token': token }
             });
             setUsers(res.data);
@@ -83,7 +83,7 @@ const HOCDocuments = () => {
         try {
             const token = localStorage.getItem('token');
             const user = JSON.parse(localStorage.getItem('user'));
-            const res = await axios.get(`${API_BASE_URL}/api/cases', {
+            const res = await axios.get(`${API_BASE_URL}/api/cases`, {
                 headers: { 'x-auth-token': token }
             });
             // Filter cases assigned to the logged-in HOC
@@ -156,7 +156,7 @@ const HOCDocuments = () => {
             formData.append('file', file);
 
             try {
-                await axios.post(`${API_BASE_URL}/api/documents/upload', formData, {
+                await axios.post(`${API_BASE_URL}/api/documents/upload`, formData, {
                     headers: {
                         'x-auth-token': token,
                         'Content-Type': 'multipart/form-data'

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Filter, Users, UserCheck, UserX } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import API_BASE_URL from '../../config/api';
 
 const Clients = () => {
     const navigate = useNavigate();
@@ -18,7 +19,7 @@ const Clients = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/clients', {
+            const response = await fetch(`${API_BASE_URL}/api/clients`, {
                 headers: {
                     'x-auth-token': token
                 }

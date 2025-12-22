@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DollarSign, User, Calendar, CheckCircle, XCircle, Clock, Send, Plus, Search, Filter, Eye } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 const Funds = () => {
     const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Funds = () => {
             const user = JSON.parse(localStorage.getItem('user'));
             const currentUserId = user?.id;
 
-            const response = await fetch(`${API_BASE_URL}/api/funds', {
+            const response = await fetch(`${API_BASE_URL}/api/funds`, {
                 headers: { 'x-auth-token': token }
             });
 

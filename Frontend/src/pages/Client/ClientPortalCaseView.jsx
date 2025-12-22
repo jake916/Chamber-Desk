@@ -8,7 +8,7 @@ import ClientPartiesSection from '../../components/ClientPortal/ClientPartiesSec
 import ClientWitnessesSection from '../../components/ClientPortal/ClientWitnessesSection';
 import ClientCourtInfo from '../../components/ClientPortal/ClientCourtInfo';
 import ClientReportsTimeline from '../../components/ClientPortal/ClientReportsTimeline';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ClientPortalCaseView = () => {
     const { shareToken, caseId } = useParams();

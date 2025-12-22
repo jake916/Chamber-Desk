@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { User, UserCog, Briefcase, Save, X } from 'lucide-react';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const EditUserForm = ({ user, onSuccess, onCancel }) => {
     const [formData, setFormData] = useState({

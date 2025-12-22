@@ -8,7 +8,7 @@ import EditTaskModal from '../../components/modals/EditTaskModal';
 import DeleteTaskModal from '../../components/modals/DeleteTaskModal';
 import RemoveDocumentModal from '../../components/modals/RemoveDocumentModal';
 import AttachCaseModal from '../../components/modals/AttachCaseModal';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const TaskDetails = () => {
     const { id } = useParams();
@@ -71,8 +71,8 @@ const TaskDetails = () => {
         try {
             const token = localStorage.getItem('token');
             const [casesRes, usersRes] = await Promise.all([
-                fetch(`${API_BASE_URL}/api/cases', { headers: { 'x-auth-token': token } }),
-                fetch(`${API_BASE_URL}/api/users/selectable', { headers: { 'x-auth-token': token } })
+                fetch(`${API_BASE_URL}/api/cases`, { headers: { 'x-auth-token': token } }),
+                fetch(`${API_BASE_URL}/api/users/selectable`, { headers: { 'x-auth-token': token } })
             ]);
 
             if (casesRes.ok) {

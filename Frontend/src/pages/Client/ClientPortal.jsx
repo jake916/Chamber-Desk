@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { AlertCircle, Briefcase, Calendar, FileText } from 'lucide-react';
 import ClientAuthSetup from '../../components/ClientPortal/ClientAuthSetup';
 import ClientAuthLogin from '../../components/ClientPortal/ClientAuthLogin';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ClientPortal = () => {
     const { shareToken } = useParams();

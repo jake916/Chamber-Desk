@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Radio, Calendar, User, X, MessageSquare } from 'lucide-react';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
+import API_BASE_URL from '../../config/api';
 
 const Broadcast = () => {
     const [broadcasts, setBroadcasts] = useState([]);
@@ -15,7 +16,7 @@ const Broadcast = () => {
     const fetchBroadcasts = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/broadcasts', {
+            const response = await fetch(`${API_BASE_URL}/api/broadcasts`, {
                 headers: { 'x-auth-token': token }
             });
             if (response.ok) {

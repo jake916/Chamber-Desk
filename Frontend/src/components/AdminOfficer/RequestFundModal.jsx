@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, DollarSign, FileText, CheckCircle, AlertCircle } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 const RequestFundModal = ({ isOpen, onClose, onFundRequested }) => {
     const [formData, setFormData] = useState({
@@ -20,7 +21,7 @@ const RequestFundModal = ({ isOpen, onClose, onFundRequested }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/funds', {
+            const response = await fetch(`${API_BASE_URL}/api/funds`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

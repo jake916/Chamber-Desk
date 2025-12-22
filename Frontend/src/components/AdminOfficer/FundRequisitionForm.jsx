@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, ArrowLeft } from 'lucide-react';
+import API_BASE_URL from '../../config/api';
 
 // This component mirrors the style of AddClientForm.jsx but is for creating a fund requisition.
 // It will be used as a full page (e.g., routed to /admin/funds/request) instead of a modal.
@@ -34,7 +35,7 @@ const FundRequisitionForm = () => {
     const fetchCases = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/cases', {
+            const res = await fetch(`${API_BASE_URL}/api/cases`, {
                 headers: { 'x-auth-token': token }
             });
             if (res.ok) {
@@ -62,7 +63,7 @@ const FundRequisitionForm = () => {
     const fetchClients = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/clients', {
+            const res = await fetch(`${API_BASE_URL}/api/clients`, {
                 headers: { 'x-auth-token': token }
             });
             if (res.ok) {
@@ -90,7 +91,7 @@ const FundRequisitionForm = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await fetch(`${API_BASE_URL}/api/funds', {
+            const res = await fetch(`${API_BASE_URL}/api/funds`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, CheckCircle, XCircle, Briefcase, AlertCircle, Calendar, ArrowRight, MessageSquare, Trash2, UserPlus, UserCheck, DollarSign, Users, CheckSquare } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate, useOutletContext } from 'react-router-dom';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ClientNotifications = () => {
     const navigate = useNavigate();

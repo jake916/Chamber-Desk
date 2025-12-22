@@ -6,7 +6,7 @@ import {
     Briefcase, Users, FileText, AlertCircle, MessageSquare
 } from 'lucide-react';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
-import API_BASE_URL from '../../../config/api';
+import API_BASE_URL from '../../config/api';
 
 const ClientDetails = () => {
     const { id } = useParams();
