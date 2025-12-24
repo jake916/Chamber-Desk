@@ -32,6 +32,10 @@ const AddTaskModal = ({ isOpen, onClose, onSuccess, initialStatus = 'To-Do' }) =
     const fetchTaskData = async () => {
         try {
             const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userRole = user.role;
+            const userId = user._id || user.id;
+
             const [casesRes, usersRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/api/cases`, { headers: { 'x-auth-token': token } }),
                 fetch(`${API_BASE_URL}/api/users/selectable`, { headers: { 'x-auth-token': token } })
@@ -39,7 +43,20 @@ const AddTaskModal = ({ isOpen, onClose, onSuccess, initialStatus = 'To-Do' }) =
 
             if (casesRes.ok) {
                 const casesData = await casesRes.json();
-                setTaskCases(casesData);
+
+                // Filter cases based on user role
+                let filteredCases = casesData;
+                if (userRole === 'Lawyer') {
+                    // Lawyers should only see cases they are assigned to
+                    filteredCases = casesData.filter(caseItem =>
+                        caseItem.assignedLawyers &&
+                        caseItem.assignedLawyers.some(lawyer =>
+                            lawyer._id === userId || lawyer === userId
+                        )
+                    );
+                }
+
+                setTaskCases(filteredCases);
             }
             if (usersRes.ok) {
                 const usersData = await usersRes.json();
@@ -157,7 +174,7 @@ const AddTaskModal = ({ isOpen, onClose, onSuccess, initialStatus = 'To-Do' }) =
 
                 <form onSubmit={handleSubmit} className="p-6 space-y-6">
                     {message.text && (
-                        <div className={`p - 3 rounded - lg text - sm ${ message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700' }`}>
+                        <div className={`p - 3 rounded - lg text - sm ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                             {message.text}
                         </div>
                     )}

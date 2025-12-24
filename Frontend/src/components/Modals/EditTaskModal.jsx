@@ -135,7 +135,6 @@ const EditTaskModal = ({
                                     id="edit-start-date"
                                     type="date"
                                     value={formData.startDate}
-                                    min={new Date().toISOString().split('T')[0]}
                                     onChange={e => setFormData({ ...formData, startDate: e.target.value })}
                                     onClick={(e) => e.target.showPicker?.()}
                                     disabled={isSaving}
@@ -149,7 +148,7 @@ const EditTaskModal = ({
                                     id="edit-end-date"
                                     type="date"
                                     value={formData.endDate}
-                                    min={formData.startDate || new Date().toISOString().split('T')[0]}
+                                    min={formData.startDate}
                                     onChange={e => setFormData({ ...formData, endDate: e.target.value })}
                                     onClick={(e) => e.target.showPicker?.()}
                                     disabled={isSaving}

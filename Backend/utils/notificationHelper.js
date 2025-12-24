@@ -25,7 +25,7 @@ async function notifyAdmins(type, message, relatedEntity) {
         }));
 
         await Notification.insertMany(notifications);
-        } catch (error) {
+    } catch (error) {
         console.error('Error notifying admins:', error);
         // Don't throw error to prevent disrupting the main operation
     }
@@ -53,26 +53,27 @@ async function notifySuperAdmins(type, message, relatedEntity) {
         }));
 
         await Notification.insertMany(notifications);
-        } catch (error) {
+    } catch (error) {
         console.error('Error notifying superadmins:', error);
     }
 }
 
 /**
- * Send notification to all stakeholders of a case (HOC, lawyers, admins)
+ * Send notification to all stakeholders of a case (HOC, lawyers, paralegals, admins)
+ * Everyone on the case receives notifications, including the person who made the change
  * @param {string} caseId - ID of the case
  * @param {string} type - Notification type
  * @param {string} message - Notification message
- * @param {string} excludeUserId - User ID to exclude from notifications (optional)
  */
-async function notifyCaseStakeholders(caseId, type, message, excludeUserId = null) {
+async function notifyCaseStakeholders(caseId, type, message) {
     try {
         const Case = require('../models/Case');
 
         // Fetch the case with populated fields
         const caseItem = await Case.findById(caseId)
             .populate('assignedTo')
-            .populate('assignedLawyers');
+            .populate('assignedLawyers')
+            .populate('assignedParalegals');
 
         if (!caseItem) {
             return;
@@ -81,25 +82,28 @@ async function notifyCaseStakeholders(caseId, type, message, excludeUserId = nul
         const recipients = new Set(); // Use Set to avoid duplicates
 
         // Add HOC if assigned
-        if (caseItem.assignedTo && caseItem.assignedTo._id.toString() !== excludeUserId) {
+        if (caseItem.assignedTo) {
             recipients.add(caseItem.assignedTo._id.toString());
         }
 
         // Add all assigned lawyers
         if (caseItem.assignedLawyers && caseItem.assignedLawyers.length > 0) {
             caseItem.assignedLawyers.forEach(lawyer => {
-                if (lawyer._id.toString() !== excludeUserId) {
-                    recipients.add(lawyer._id.toString());
-                }
+                recipients.add(lawyer._id.toString());
+            });
+        }
+
+        // Add all assigned paralegals
+        if (caseItem.assignedParalegals && caseItem.assignedParalegals.length > 0) {
+            caseItem.assignedParalegals.forEach(paralegal => {
+                recipients.add(paralegal._id.toString());
             });
         }
 
         // Add all admins
         const admins = await User.find({ role: { $in: ['Admin', 'Superadmin'] } });
         admins.forEach(admin => {
-            if (admin._id.toString() !== excludeUserId) {
-                recipients.add(admin._id.toString());
-            }
+            recipients.add(admin._id.toString());
         });
 
         // Create notifications for all recipients
@@ -115,8 +119,7 @@ async function notifyCaseStakeholders(caseId, type, message, excludeUserId = nul
             }));
 
             await Notification.insertMany(notifications);
-            } else {
-            }
+        }
     } catch (error) {
         console.error('Error notifying case stakeholders:', error);
         // Don't throw error to prevent disrupting the main operation

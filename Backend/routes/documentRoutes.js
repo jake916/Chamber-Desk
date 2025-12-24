@@ -326,8 +326,7 @@ router.put('/:id/link-to-case', auth, async (req, res) => {
             await notifyCaseStakeholders(
                 caseId,
                 'document_added_to_case',
-                `${userName} added document "${document.name}" to case "${caseDoc.caseTitle}" library`,
-                req.user.id
+                `${userName} added document "${document.name}" to case "${caseDoc.caseTitle}" library`
             );
         }
 

@@ -24,6 +24,8 @@ const notificationSchema = new mongoose.Schema({
             'case_updated',
             'lawyers_assigned',
             'lawyers_removed',
+            'paralegals_assigned',
+            'paralegals_removed',
             'document_added_to_case',
             'document_upload',
             'document_share',

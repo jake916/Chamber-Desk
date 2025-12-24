@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LawyerFunds from './pages/Lawyers/LawyerFunds';
 import FundRequisitionForm from './components/AdminOfficer/FundRequisitionForm';
 // // import RequestFundModal from '../../components/AdminOfficer/RequestFundModal';
 import Login from './pages/Auth/Login';
@@ -7,10 +8,14 @@ import ManagerDashboard from './pages/Managers/ManagerDashboard';
 import HOCLayout from './pages/HOC/HOCLayout';
 import HOCHome from './pages/HOC/Home';
 import HOCCaseDetails from './pages/HOC/CaseDetails';
+
+
 import HOCFunds from './pages/HOC/Funds';
 import HOCNotifications from './pages/HOC/Notifications';
 import HOCReportThread from './pages/HOC/HOCReportThread';
+import LawyerLayout from './pages/Lawyers/LawyerLayout';
 import LawyerDashboard from './pages/Lawyers/LawyerDashboard';
+import LawyerCaseDetails from './pages/Lawyers/LawyerCaseDetails';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminHome from './pages/Admin/AdminHome';
 import ClientManagement from './pages/Shared/ClientManagement'; // Shared component
@@ -21,8 +26,9 @@ import AddCaseForm from './components/AdminOfficer/AddCaseForm';
 import EditCaseForm from './components/AdminOfficer/EditCaseForm';
 import CaseManagement from './pages/Shared/CaseManagement'; // Shared component
 import CaseDetails from './pages/Admin/CaseDetails';
+
 import FundRequisitionList from './pages/Admin/FundRequisitionList';
-import Notifications from './pages/Admin/Notifications';
+import Notifications from './pages/Shared/Notifications'; // Shared component
 import Documents from './pages/Shared/Documents'; // Shared component
 import Support from './pages/Shared/Support'; // Shared component
 import Meetings from './pages/Shared/Meetings'; // Shared component
@@ -81,7 +87,7 @@ function App() {
           <Route path="funds" element={<HOCFunds />} />
           <Route path="funds/request" element={<FundRequisitionForm />} />
           <Route path="documents" element={<Documents />} />
-          <Route path="notifications" element={<HOCNotifications />} />
+          <Route path="notifications" element={<Notifications basePath="/hoc" primaryColor="purple" secondaryColor="orange" />} />
           <Route path="support" element={<Support />} />
           <Route path="tasks" element={<Tasks />} />
           <Route path="tasks/:id" element={<TaskDetails />} />
@@ -90,7 +96,20 @@ function App() {
           <Route path="complaints/:id" element={<ComplaintDetails />} />
         </Route>
 
-        <Route path="/lawyer/*" element={<LawyerDashboard />} />
+        <Route path="/lawyer" element={<LawyerLayout />}>
+          <Route index element={<LawyerDashboard />} />
+          <Route path="cases" element={<CaseManagement />} />
+          <Route path="cases/:id" element={<LawyerCaseDetails />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="tasks/:id" element={<TaskDetails />} />
+          <Route path="meetings" element={<Meetings />} />
+          <Route path="broadcast" element={<Broadcast />} />
+          <Route path="funds" element={<LawyerFunds />} />
+          <Route path="funds/request" element={<FundRequisitionForm />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="support" element={<Support />} />
+          <Route path="notifications" element={<Notifications basePath="/lawyer" primaryColor="green" secondaryColor="orange" />} />
+        </Route>
 
         {/* Admin Routes */}
         <Route path="/admin" element={<AdminDashboard />}>
@@ -105,7 +124,7 @@ function App() {
           <Route path="cases/:id" element={<CaseDetails />} />
           <Route path="funds" element={<FundRequisitionList />} />
           <Route path="funds/request" element={<FundRequisitionForm />} />
-          <Route path="notifications" element={<Notifications />} />
+          <Route path="notifications" element={<Notifications basePath="/admin" primaryColor="blue" secondaryColor="orange" />} />
           <Route path="documents" element={<Documents />} />
           <Route path="support" element={<Support />} />
           <Route path="meetings" element={<Meetings />} />

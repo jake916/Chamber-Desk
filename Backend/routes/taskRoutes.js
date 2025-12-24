@@ -53,6 +53,38 @@ const notifyTaskForce = async (task, currentUserId, notificationType, message) =
     }
 };
 
+// Helper function to check and update overdue tasks
+const checkAndUpdateOverdueTasks = async (tasks) => {
+    const now = new Date();
+    const updates = [];
+
+    for (const task of tasks) {
+        // Only update if task has an end date, is not already overdue, and is not completed/cancelled
+        if (task.endDate &&
+            task.status !== 'Overdue' &&
+            task.status !== 'Completed' &&
+            task.status !== 'Cancelled') {
+
+            const endDate = new Date(task.endDate);
+            // Check if end date has passed (comparing dates only, not time)
+            endDate.setHours(23, 59, 59, 999); // Set to end of day
+
+            if (now > endDate) {
+                task.status = 'Overdue';
+                updates.push(task.save());
+            }
+        }
+    }
+
+    // Save all updates
+    if (updates.length > 0) {
+        await Promise.all(updates);
+    }
+
+    return tasks;
+};
+
+
 // @route   POST /api/tasks
 // @desc    Create a new task
 // @access  Private
@@ -119,6 +151,9 @@ router.get('/', auth, async (req, res) => {
             .populate('createdBy', 'name')
             .sort({ createdAt: -1 });
 
+        // Check and update overdue tasks
+        await checkAndUpdateOverdueTasks(tasks);
+
         res.json(tasks);
     } catch (err) {
         console.error(err.message);
@@ -145,6 +180,9 @@ router.get('/my-tasks', auth, async (req, res) => {
             .populate('createdBy', 'name')
             .sort({ endDate: 1 }); // Sort by due date ascending
 
+        // Check and update overdue tasks
+        await checkAndUpdateOverdueTasks(tasks);
+
         res.json(tasks);
     } catch (err) {
         console.error(err.message);
@@ -170,6 +208,9 @@ router.get('/:id', auth, async (req, res) => {
         if (!task) {
             return res.status(404).json({ msg: 'Task not found' });
         }
+
+        // Check and update if overdue
+        await checkAndUpdateOverdueTasks([task]);
 
         res.json(task);
     } catch (err) {

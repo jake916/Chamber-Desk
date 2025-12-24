@@ -40,6 +40,12 @@ const CaseManagement = () => {
                         (caseItem.createdBy && caseItem.createdBy._id === userId)
                     );
                     setCases(hocCases);
+                } else if (userRole === 'Lawyer') {
+                    // Lawyer: Only show cases assigned to them
+                    const lawyerCases = data.filter(caseItem =>
+                        caseItem.assignedLawyers && caseItem.assignedLawyers.some(l => l._id === userId || l === userId)
+                    );
+                    setCases(lawyerCases);
                 } else {
                     // Admin: Show all cases
                     setCases(data);
@@ -106,17 +112,19 @@ const CaseManagement = () => {
     };
 
     const getBasePath = () => {
+        if (userRole === 'Lawyer') return '/lawyer';
         return userRole === 'Admin' ? '/admin' : userRole === 'HOC' ? '/hoc' : '/dashboard';
     };
 
     const getPrimaryColor = () => {
+        if (userRole === 'Lawyer') return 'green';
         return userRole === 'Admin' ? 'orange' : 'purple';
     };
 
     const primaryColor = getPrimaryColor();
 
     return (
-        <div className={userRole === 'HOC' ? 'p-6' : ''}>
+        <div className={userRole === 'HOC' || userRole === 'Lawyer' ? 'p-6' : ''}>
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">Case Management</h2>
                 {/* HOC-only: Add New Case Button */}
@@ -282,12 +290,23 @@ const CaseManagement = () => {
                             )}
 
                             {/* Assigned Lawyer */}
-                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-1">
                                 <UserCircle className="w-4 h-4" />
                                 <span className="font-medium">Lawyer:</span>
                                 <span>
                                     {caseItem.assignedLawyers && caseItem.assignedLawyers.length > 0
                                         ? caseItem.assignedLawyers.map(l => l.name).join(', ')
+                                        : 'Not Assigned'}
+                                </span>
+                            </div>
+
+                            {/* Assigned Paralegals */}
+                            <div className="flex items-center gap-2 text-xs text-gray-500 mb-3">
+                                <UserCircle className="w-4 h-4" />
+                                <span className="font-medium">Paralegal:</span>
+                                <span>
+                                    {caseItem.assignedParalegals && caseItem.assignedParalegals.length > 0
+                                        ? caseItem.assignedParalegals.map(p => p.name).join(', ')
                                         : 'Not Assigned'}
                                 </span>
                             </div>

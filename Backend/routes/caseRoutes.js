@@ -170,6 +170,7 @@ router.get('/', auth, async (req, res) => {
             .populate('client', 'name email')
             .populate('assignedTo', 'name email')
             .populate('assignedLawyers', 'name email')
+            .populate('assignedParalegals', 'name email')
             .sort({ createdAt: -1 });
 
         res.json(cases);
@@ -204,7 +205,8 @@ router.get('/:id', auth, async (req, res) => {
         const caseItem = await Case.findById(req.params.id)
             .populate('client', 'name email phone address occupation dateOfBirth')
             .populate('assignedTo', 'name email')
-            .populate('assignedLawyers', 'name email');
+            .populate('assignedLawyers', 'name email')
+            .populate('assignedParalegals', 'name email');
 
         if (!caseItem) {
             return res.status(404).json({ msg: 'Case not found' });
@@ -486,8 +488,7 @@ router.put('/:id', auth, async (req, res) => {
             await notifyCaseStakeholders(
                 req.params.id,
                 'court_update',
-                `${userName} added/updated court date for case "${caseItem.caseTitle}"`,
-                req.user.id
+                `${userName} added/updated court date for case "${caseItem.caseTitle}"`
             );
         }
 
@@ -528,8 +529,7 @@ router.put('/:id', auth, async (req, res) => {
             await notifyCaseStakeholders(
                 req.params.id,
                 'case_updated',
-                `${userName} updated case "${caseItem.caseTitle}"`,
-                req.user.id
+                `${userName} updated case "${caseItem.caseTitle}"`
             );
 
             // Notify client about case update
@@ -752,8 +752,7 @@ router.post('/:id/assign-lawyers', auth, async (req, res) => {
             await notifyCaseStakeholders(
                 req.params.id,
                 'lawyers_assigned',
-                `${userName} assigned lawyers to case "${caseItem.caseTitle}"`,
-                req.user.id
+                `${userName} assigned lawyers to case "${caseItem.caseTitle}"`
             );
         }
 
@@ -772,8 +771,7 @@ router.post('/:id/assign-lawyers', auth, async (req, res) => {
             await notifyCaseStakeholders(
                 req.params.id,
                 'lawyers_removed',
-                `${userName} removed lawyers from case "${caseItem.caseTitle}"`,
-                req.user.id
+                `${userName} removed lawyers from case "${caseItem.caseTitle}"`
             );
         }
 
@@ -784,6 +782,116 @@ router.post('/:id/assign-lawyers', auth, async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+
+// @route   POST /api/cases/:id/assign-paralegals
+// @desc    Assign paralegals to case
+// @access  Private (Lawyers only)
+router.post('/:id/assign-paralegals', auth, async (req, res) => {
+    try {
+        const { paralegalIds } = req.body;
+
+        // Check if user is a Lawyer, HOC, or Admin
+        const user = await User.findById(req.user.id);
+        if (!user || !['Lawyer', 'HOC', 'Admin'].includes(user.role)) {
+            return res.status(403).json({ msg: 'Only Lawyers, HOC, and Admin can assign paralegals' });
+        }
+
+        const caseItem = await Case.findById(req.params.id);
+
+        if (!caseItem) {
+            return res.status(404).json({ msg: 'Case not found' });
+        }
+
+        // Verify permissions based on role
+        if (user.role === 'Lawyer') {
+            // Lawyers can only assign paralegals to cases they're assigned to
+            const isAssignedLawyer = caseItem.assignedLawyers.some(
+                lawyerId => lawyerId.toString() === req.user.id
+            );
+
+            if (!isAssignedLawyer) {
+                return res.status(403).json({ msg: 'You are not assigned to this case' });
+            }
+        }
+        // HOC and Admin have full access to all cases
+
+        // Get current paralegals before update
+        const oldParalegalIds = caseItem.assignedParalegals.map(id => id.toString());
+        const newParalegalIds = paralegalIds.map(id => id.toString());
+
+        // Detect added and removed paralegals
+        const addedParalegals = newParalegalIds.filter(id => !oldParalegalIds.includes(id));
+        const removedParalegals = oldParalegalIds.filter(id => !newParalegalIds.includes(id));
+
+        // Update the case
+        caseItem.assignedParalegals = paralegalIds;
+        await caseItem.save();
+
+        const userName = user?.name || 'Someone';
+
+        // Create automated report and notification for added paralegals
+        if (addedParalegals.length > 0) {
+            // Create automated report
+            const report = new CaseReport({
+                case: caseItem._id,
+                author: req.user.id,
+                content: `${userName} assigned paralegals to the case`,
+                type: 'Automated',
+                actionType: 'Assignment'
+            });
+            await report.save();
+
+            // Notify each added paralegal
+            for (const paralegalId of addedParalegals) {
+                try {
+                    await new Notification({
+                        recipient: paralegalId,
+                        message: `You have been assigned to case "${caseItem.caseTitle}" by ${userName}`,
+                        type: 'case_assignment',
+                        relatedEntity: {
+                            entityType: 'Case',
+                            entityId: caseItem._id
+                        }
+                    }).save();
+                } catch (notifErr) {
+                    console.error('Error notifying paralegal:', notifErr.message);
+                }
+            }
+
+            // Notify case stakeholders
+            await notifyCaseStakeholders(
+                req.params.id,
+                'paralegals_assigned',
+                `${userName} assigned paralegals to case "${caseItem.caseTitle}"`
+            );
+        }
+
+        // Create automated report for removed paralegals
+        if (removedParalegals.length > 0) {
+            const report = new CaseReport({
+                case: caseItem._id,
+                author: req.user.id,
+                content: `${userName} removed paralegals from the case`,
+                type: 'Automated',
+                actionType: 'Assignment'
+            });
+            await report.save();
+
+            await notifyCaseStakeholders(
+                req.params.id,
+                'paralegals_removed',
+                `${userName} removed paralegals from case "${caseItem.caseTitle}"`
+            );
+        }
+
+        res.json({ msg: 'Paralegals assigned successfully', case: caseItem });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 
 // @route   GET /api/cases/:id/reports
 // @desc    Get all reports for a case
@@ -859,7 +967,7 @@ router.post('/:id/reports', auth, async (req, res) => {
                     entityId: caseItem._id
                 }
             }));
-            
+
             if (managerNotifications.length > 0) {
                 await Notification.insertMany(managerNotifications);
             }
@@ -1032,10 +1140,10 @@ router.post('/:id/client-report', auth, async (req, res) => {
             return res.status(400).json({ msg: 'Both subject and report content are required' });
         }
 
-        // Check if user is HOC
+        // Check if user is HOC or Lawyer
         const user = await User.findById(req.user.id);
-        if (!user || user.role !== 'HOC') {
-            return res.status(403).json({ msg: 'Only HOC can post client reports' });
+        if (!user || (user.role !== 'HOC' && user.role !== 'Lawyer')) {
+            return res.status(403).json({ msg: 'Only HOC and Lawyers can post client reports' });
         }
 
         const caseItem = await Case.findById(req.params.id);
@@ -1177,8 +1285,8 @@ router.post('/shared/:token/report/:reportId/reply', async (req, res) => {
                         entityId: caseItem._id
                     }
                 }).save();
-                } else {
-                }
+            } else {
+            }
         } catch (notifErr) {
             console.error('❌ Error notifying HOC about client reply:', notifErr.message);
             console.error('Full error:', notifErr);
@@ -1196,8 +1304,8 @@ router.post('/shared/:token/report/:reportId/reply', async (req, res) => {
                         entityId: caseItem._id
                     }
                 }).save();
-                } else {
-                }
+            } else {
+            }
         } catch (notifErr) {
             console.error('❌ Error notifying client about reply confirmation:', notifErr.message);
             console.error('Full error:', notifErr);

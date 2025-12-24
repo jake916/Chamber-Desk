@@ -71,6 +71,23 @@ router.get('/lawyers', auth, async (req, res) => {
     }
 });
 
+// @route   GET /api/users/paralegals
+// @desc    Get all Paralegal users
+// @access  Private
+router.get('/paralegals', auth, async (req, res) => {
+    try {
+        const paralegals = await User.find({ role: 'Paralegal' })
+            .select('name email role')
+            .sort({ name: 1 });
+
+        res.json(paralegals);
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 // @route   GET /api/users/selectable
 // @desc    Get all users except Superadmin
 // @access  Private

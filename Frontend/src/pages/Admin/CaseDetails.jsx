@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, User, Calendar, Briefcase, MapPin, Scale, Edit2,
     Users, FileText, AlertCircle, CheckCircle, Building, RefreshCw,
-    FolderOpen, Plus, Trash2, Download, Image as ImageIcon, File, Video, Music, X
+    FolderOpen, Plus, Trash2, Download, Image as ImageIcon, File, Video, Music, X, UserPlus
 } from 'lucide-react';
 import axios from 'axios';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
@@ -508,13 +508,27 @@ const CaseDetails = () => {
                                     {caseData.assignedLawyers && caseData.assignedLawyers.length > 0 ? (
                                         <div className="flex flex-wrap gap-1">
                                             {caseData.assignedLawyers.map((lawyer, idx) => (
-                                                <span key={idx} className="px-2 py-1 text-xs bg-purple-500 text-black rounded-full">
+                                                <span key={idx} className="px-2 py-1 text-xs bg-purple-500 text-white rounded-full">
                                                     {lawyer.name}
                                                 </span>
                                             ))}
                                         </div>
                                     ) : (
                                         <p className="text-sm text-black italic">Not Assigned</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-xs text-black mb-1">Assigned Paralegals</p>
+                                    {caseData.assignedParalegals && caseData.assignedParalegals.length > 0 ? (
+                                        <div className="flex flex-wrap gap-1">
+                                            {caseData.assignedParalegals.map((paralegal, idx) => (
+                                                <span key={idx} className="px-2 py-1 text-xs bg-purple-500 text-white rounded-full">
+                                                    {paralegal.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 italic">No paralegals assigned</p>
                                     )}
                                 </div>
                             </div>

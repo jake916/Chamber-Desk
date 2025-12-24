@@ -220,7 +220,7 @@ const Home = () => {
     };
 
     return (
-        <div>
+        <div className='p-6'>
             {isLoading ? (
                 <LoadingSpinner message="Loading dashboard data..." color="purple" />
             ) : (
@@ -230,18 +230,26 @@ const Home = () => {
                             <h1 className="text-2xl md:text-3xl text-black font-bold mb-2">Welcome HOC, {userName}</h1>
                             <p className="text-slate-600">Here's an overview of your chambers</p>
                         </div>
-                        <button
-                            onClick={() => navigate('/hoc/notifications')}
-                            className="hidden md:block relative p-3 rounded-full hover:bg-gray-100 transition-colors"
-                            title="Notifications"
-                        >
-                            <Bell className="w-6 h-6 text-gray-700" />
-                            {unreadCount > 0 && (
-                                <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                    {unreadCount}
-                                </span>
-                            )}
-                        </button>
+                        <div className='flex items-center gap-4'>
+                            <button
+                                onClick={() => navigate('/hoc/notifications')}
+                                className="hidden md:block relative p-3 rounded-full hover:bg-gray-100 transition-colors"
+                                title="Notifications"
+                            >
+                                <Bell className="w-6 h-6 text-gray-700" />
+                                {unreadCount > 0 && (
+                                    <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                        {unreadCount}
+                                    </span>
+                                )}
+                            </button>
+                            <div className="text-right hidden md:block border border-gray-200 rounded p-3">
+                                <p className="text-sm font-medium text-gray-900">
+                                    {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                                </p>
+                            </div>
+
+                        </div>
                     </div>
 
                     {/* Quick Actions */}

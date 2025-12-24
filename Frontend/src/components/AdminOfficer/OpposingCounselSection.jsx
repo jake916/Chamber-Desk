@@ -15,13 +15,15 @@ const OpposingCounselSection = ({ opposingCounselHistory, onUpdateClick, formatD
             <div>
                 <div className="flex justify-between items-center mb-2">
                     <p className="text-sm font-semibold text-gray-700">Opposing Counsel (if known)</p>
-                    <button
-                        onClick={onUpdateClick}
-                        className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1"
-                    >
-                        <Plus className="w-3 h-3" />
-                        Update Counsel
-                    </button>
+                    {onUpdateClick && (
+                        <button
+                            onClick={onUpdateClick}
+                            className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1"
+                        >
+                            <Plus className="w-3 h-3" />
+                            Update Counsel
+                        </button>
+                    )}
                 </div>
                 <p className="text-sm text-gray-900">N/A</p>
             </div>
@@ -38,13 +40,15 @@ const OpposingCounselSection = ({ opposingCounselHistory, onUpdateClick, formatD
             <div>
                 <div className="flex justify-between items-center mb-2">
                     <p className="text-sm font-semibold text-gray-700">Opposing Counsel (if known)</p>
-                    <button
-                        onClick={onUpdateClick}
-                        className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1"
-                    >
-                        <Plus className="w-3 h-3" />
-                        Update Counsel
-                    </button>
+                    {onUpdateClick && (
+                        <button
+                            onClick={onUpdateClick}
+                            className="px-3 py-1.5 bg-purple-600 text-white text-xs font-medium rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-1"
+                        >
+                            <Plus className="w-3 h-3" />
+                            Update Counsel
+                        </button>
+                    )}
                 </div>
                 <div className="flex items-center gap-2">
                     <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded">Current</span>

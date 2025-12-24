@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     ArrowLeft, User, Calendar, Briefcase, MapPin, Scale, Edit2,
     Users, FileText, AlertCircle, CheckCircle, Building, RefreshCw, ChevronRight, MessageCircle,
-    FolderOpen, Plus, Trash2, Download, Image as ImageIcon, File, Video, Music, X
+    FolderOpen, Plus, Trash2, Download, Image as ImageIcon, File, Video, Music, X, UserPlus
 } from 'lucide-react';
 import axios from 'axios';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
@@ -37,10 +37,16 @@ const CaseDetails = () => {
     const [showCounselModal, setShowCounselModal] = useState(false);
     const [documentToRemove, setDocumentToRemove] = useState(null);
 
+    // Paralegal assignment states
+    const [showParalegalModal, setShowParalegalModal] = useState(false);
+    const [paralegalUsers, setParalegalUsers] = useState([]);
+    const [selectedParalegals, setSelectedParalegals] = useState([]);
+
     useEffect(() => {
         fetchCaseDetails();
         fetchCaseDocuments();
         fetchLawyers();
+        fetchParalegals();
     }, [id]);
 
     const fetchCaseDetails = async () => {
@@ -56,6 +62,7 @@ const CaseDetails = () => {
                 setCaseData(data);
                 setSelectedStatus(data.status);
                 setSelectedLawyers(data.assignedLawyers?.map(l => l._id) || []);
+                setSelectedParalegals(data.assignedParalegals?.map(p => p._id) || []);
             } else {
                 console.error('Failed to fetch case details');
             }
@@ -153,6 +160,62 @@ const CaseDetails = () => {
         } catch (err) {
             console.error('Error fetching lawyers:', err);
         }
+    };
+
+    const fetchParalegals = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/users/paralegals`, {
+                headers: { 'x-auth-token': token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setParalegalUsers(data);
+            }
+        } catch (err) {
+            console.error('Error fetching paralegals:', err);
+        }
+    };
+
+    const handleAssignParalegals = async () => {
+        setIsUpdating(true);
+        setMessage({ type: '', text: '' });
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/cases/${id}/assign-paralegals`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({ paralegalIds: selectedParalegals })
+            });
+
+            if (response.ok) {
+                setMessage({ type: 'success', text: 'Paralegals assigned successfully!' });
+                setShowParalegalModal(false);
+                setTimeout(() => {
+                    fetchCaseDetails();
+                }, 500);
+            } else {
+                const data = await response.json();
+                setMessage({ type: 'error', text: data.msg || 'Failed to assign paralegals' });
+            }
+        } catch (err) {
+            setMessage({ type: 'error', text: 'Error assigning paralegals' });
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
+    const toggleParalegal = (paralegalId) => {
+        setSelectedParalegals(prev =>
+            prev.includes(paralegalId)
+                ? prev.filter(id => id !== paralegalId)
+                : [...prev, paralegalId]
+        );
     };
 
     const handleAssignLawyers = async () => {
@@ -386,7 +449,7 @@ const CaseDetails = () => {
             {/* Quick Actions */}
             <div className="mb-8">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+                <div className="grid grid-cols-2 md:grid-cols-7 gap-4">
                     <button
                         onClick={() => setShowClientReportModal(true)}
                         className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3"
@@ -409,6 +472,14 @@ const CaseDetails = () => {
                     >
                         <div className="p-3 bg-white/20 rounded-lg"><Users className="w-6 h-6" /></div>
                         <span className="font-semibold text-sm text-center">Assign Lawyers</span>
+                    </button>
+
+                    <button
+                        onClick={() => setShowParalegalModal(true)}
+                        className="bg-gradient-to-br from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3"
+                    >
+                        <div className="p-3 bg-white/20 rounded-lg"><UserPlus className="w-6 h-6" /></div>
+                        <span className="font-semibold text-sm text-center">Assign Paralegal</span>
                     </button>
 
                     <button
@@ -501,13 +572,27 @@ const CaseDetails = () => {
                                     {caseData.assignedLawyers && caseData.assignedLawyers.length > 0 ? (
                                         <div className="flex flex-wrap gap-1">
                                             {caseData.assignedLawyers.map((lawyer, idx) => (
-                                                <span key={idx} className="px-2 py-1 text-xs bg-purple-500 text-black rounded-full">
+                                                <span key={idx} className="px-2 py-1 text-xs bg-purple-500 text-white rounded-full">
                                                     {lawyer.name}
                                                 </span>
                                             ))}
                                         </div>
                                     ) : (
                                         <p className="text-sm text-black italic">Not Assigned</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-xs text-black mb-1">Assigned Paralegals</p>
+                                    {caseData.assignedParalegals && caseData.assignedParalegals.length > 0 ? (
+                                        <div className="flex flex-wrap gap-1">
+                                            {caseData.assignedParalegals.map((paralegal, idx) => (
+                                                <span key={idx} className="px-2 py-1 text-xs bg-purple-500 text-white rounded-full">
+                                                    {paralegal.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 italic">No paralegals assigned</p>
                                     )}
                                 </div>
                             </div>
@@ -1051,6 +1136,67 @@ const CaseDetails = () => {
                 onSave={handlePostClientReport}
                 isLoading={isUpdating}
             />
+
+            {/* Paralegal Assignment Modal */}
+            {showParalegalModal && (
+                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6">
+                        <div className="flex justify-between items-center mb-6">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-purple-50 text-purple-600 rounded-lg">
+                                    <UserPlus size={24} />
+                                </div>
+                                <h3 className="text-xl font-bold text-gray-900">Assign Paralegals</h3>
+                            </div>
+                            <button
+                                onClick={() => setShowParalegalModal(false)}
+                                className="text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={24} />
+                            </button>
+                        </div>
+
+                        <div className="mb-6">
+                            <p className="text-sm text-gray-600 mb-4">Select paralegals to assign to this case:</p>
+                            <div className="space-y-2 max-h-96 overflow-y-auto">
+                                {paralegalUsers.map((paralegal) => (
+                                    <label
+                                        key={paralegal._id}
+                                        className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedParalegals.includes(paralegal._id)}
+                                            onChange={() => toggleParalegal(paralegal._id)}
+                                            className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+                                        />
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900">{paralegal.name}</p>
+                                            <p className="text-xs text-gray-500">{paralegal.email}</p>
+                                        </div>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowParalegalModal(false)}
+                                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAssignParalegals}
+                                disabled={isUpdating}
+                                className="flex-1 px-4 py-2.5 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isUpdating ? 'Assigning...' : 'Assign Paralegals'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div >
     );
 };

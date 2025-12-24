@@ -9,9 +9,13 @@ import API_BASE_URL from '../../config/api';
 const FundRequisitionForm = () => {
     const navigate = useNavigate();
 
-    // Detect if we're in HOC or Admin context
+    // Detect if we're in HOC, Lawyer or Admin context
     const isHOC = window.location.pathname.includes('/hoc/');
-    const themeColor = isHOC ? 'purple' : 'orange';
+    const isLawyer = window.location.pathname.includes('/lawyer/');
+
+    let themeColor = 'orange';
+    if (isHOC) themeColor = 'purple';
+    if (isLawyer) themeColor = 'green';
 
     // Form state
     const [requisitionType, setRequisitionType] = useState(''); // Type of Expense
@@ -41,7 +45,7 @@ const FundRequisitionForm = () => {
             if (res.ok) {
                 const data = await res.json();
 
-                if (isHOC) {
+                if (isHOC || isLawyer) {
                     const user = JSON.parse(localStorage.getItem('user'));
                     const userId = user?.id;
                     const assignedCases = data.filter(caseItem =>
@@ -103,7 +107,10 @@ const FundRequisitionForm = () => {
             if (res.ok) {
                 setMessage({ type: 'success', text: 'Fund requisition created successfully!' });
                 // Redirect back to list after a short delay
-                const redirectPath = isHOC ? '/hoc/funds' : '/admin/funds';
+                let redirectPath = '/admin/funds';
+                if (isHOC) redirectPath = '/hoc/funds';
+                if (isLawyer) redirectPath = '/lawyer/funds';
+
                 setTimeout(() => navigate(redirectPath), 1500);
             } else {
                 const errData = await res.json();
@@ -121,7 +128,7 @@ const FundRequisitionForm = () => {
     const showClientPicker = requisitionType === 'Client Meeting';
 
     return (
-        <div className={isHOC ? 'p-6' : ''}>
+        <div className={isHOC || isLawyer ? 'p-6' : ''}>
             <div className="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow-lg">
                 <button
                     onClick={() => navigate(-1)}
