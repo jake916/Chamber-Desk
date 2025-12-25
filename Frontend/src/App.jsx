@@ -39,6 +39,9 @@ import TaskDetails from './pages/Admin/TaskDetails';
 import ComplaintDetails from './pages/Shared/ComplaintDetails'; // Shared component
 import OAuthCallback from './pages/OAuthCallback';
 import ParalegalDashboard from './pages/Paralegals/ParalegalDashboard';
+import ParalegalLayout from './pages/Paralegals/ParalegalLayout';
+import ParalegalCases from './pages/Paralegals/ParalegalCases';
+import ParalegalCaseDetails from './pages/Paralegals/ParalegalCaseDetails';
 import ClientPortalLayout from './pages/Client/ClientPortalLayout';
 import ClientOverview from './pages/Client/ClientOverview';
 import ClientCases from './pages/Client/ClientCases';
@@ -136,7 +139,21 @@ function App() {
           <Route path="complaints/:id" element={<ComplaintDetails />} />
         </Route>
 
-        <Route path="/paralegal/*" element={<ParalegalDashboard />} />
+        {/* Paralegal Routes */}
+        <Route path="/paralegal" element={<ParalegalLayout />}>
+          <Route index element={<ParalegalDashboard />} />
+          <Route path="cases" element={<ParalegalCases />} />
+          <Route path="cases/:id" element={<ParalegalCaseDetails />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="tasks/:id" element={<TaskDetails />} />
+          <Route path="meetings" element={<Meetings />} />
+          <Route path="broadcast" element={<Broadcast />} />
+          <Route path="funds" element={<LawyerFunds />} />
+          <Route path="funds/request" element={<FundRequisitionForm />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="support" element={<Support />} />
+          <Route path="notifications" element={<Notifications basePath="/paralegal" primaryColor="teal" secondaryColor="cyan" />} />
+        </Route>
 
         {/* OAuth Callback */}
         <Route path="/oauth/callback" element={<OAuthCallback />} />

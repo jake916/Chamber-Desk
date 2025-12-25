@@ -46,12 +46,24 @@ const AddTaskModal = ({ isOpen, onClose, onSuccess, initialStatus = 'To-Do' }) =
 
                 // Filter cases based on user role
                 let filteredCases = casesData;
+
+                // First, exclude task-based access cases for everyone
+                filteredCases = casesData.filter(caseItem => caseItem.accessType !== 'task');
+
                 if (userRole === 'Lawyer') {
-                    // Lawyers should only see cases they are assigned to
-                    filteredCases = casesData.filter(caseItem =>
+                    // Lawyers should only see cases they are directly assigned to
+                    filteredCases = filteredCases.filter(caseItem =>
                         caseItem.assignedLawyers &&
                         caseItem.assignedLawyers.some(lawyer =>
                             lawyer._id === userId || lawyer === userId
+                        )
+                    );
+                } else if (userRole === 'Paralegal') {
+                    // Paralegals should only see cases they are directly assigned to
+                    filteredCases = filteredCases.filter(caseItem =>
+                        caseItem.assignedParalegals &&
+                        caseItem.assignedParalegals.some(paralegal =>
+                            paralegal._id === userId || paralegal === userId
                         )
                     );
                 }

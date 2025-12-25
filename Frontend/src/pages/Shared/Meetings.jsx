@@ -544,7 +544,7 @@ const Meetings = () => {
                                     className={`p-4 hover:bg-gray-50 transition-colors flex items-center justify-between group cursor-pointer ${isCancelled ? 'opacity-75' : ''}`}
                                 >
                                     <div className="flex items-start gap-4">
-                                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex flex-col items-center justify-center ${isCancelled ? 'bg-red-100 text-red-700' : 'bg-${primaryColor}-100 text-${primaryColor}-700'}`}>
+                                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex flex-col items-center justify-center ${isCancelled ? 'bg-red-100 text-red-700' : userRole === 'HOC' ? 'bg-purple-100 text-purple-700' : userRole === 'Lawyer' ? 'bg-green-100 text-green-700' : userRole === 'Paralegal' ? 'bg-teal-100 text-teal-700' : 'bg-orange-100 text-orange-700'}`}>
                                             <span className="text-xs font-bold uppercase">{new Date(meeting.date).toLocaleString('default', { month: 'short' })}</span>
                                             <span className="text-lg font-bold">{new Date(meeting.date).getDate()}</span>
                                         </div>
@@ -568,12 +568,12 @@ const Meetings = () => {
                                                 </span>
                                                 {meeting.type === 'Physical' ? (
                                                     <span className="flex items-center gap-1">
-                                                        <MapPin className="w-4 h-4" />
+                                                        <MapPin className="w-4 h-4 text-green-600" />
                                                         {meeting.location || 'No location specified'}
                                                     </span>
                                                 ) : (
                                                     <span className="flex items-center gap-1">
-                                                        <Video className="w-4 h-4" />
+                                                        <Video className="w-4 h-4 text-blue-600" />
                                                         {meeting.platform}
                                                     </span>
                                                 )}
@@ -1055,7 +1055,21 @@ const Meetings = () => {
                             {/* Edit/Cancel Buttons for Creator - Only show if created by staff (not client) */}
                             {selectedMeeting.status !== 'cancelled' && currentUser &&
                                 !selectedMeeting.clientCreator && // Don't show for client-created meetings
-                                (selectedMeeting.createdBy === currentUser._id || selectedMeeting.createdBy === currentUser.id) && (
+                                (() => {
+                                    // Handle createdBy as either object or string
+                                    const creatorId = typeof selectedMeeting.createdBy === 'string'
+                                        ? selectedMeeting.createdBy
+                                        : (selectedMeeting.createdBy?._id || selectedMeeting.createdBy?.id);
+                                    const creatorEmail = typeof selectedMeeting.createdBy === 'string'
+                                        ? selectedMeeting.createdBy
+                                        : selectedMeeting.createdBy?.email;
+
+                                    const isCreator = creatorId === currentUser._id ||
+                                        creatorId === currentUser.id ||
+                                        creatorEmail === currentUser.email;
+
+                                    return isCreator;
+                                })() && (
                                     <>
                                         <button
                                             onClick={() => handleEditClick(selectedMeeting)}

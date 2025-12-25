@@ -123,7 +123,9 @@ const getUserTaskBasedCases = async (userId) => {
     try {
         const cases = await Case.find({
             'taskBasedAccess.user': userId
-        }).populate('taskBasedAccess.task', 'name status');
+        })
+            .populate('client', 'name email')
+            .populate('taskBasedAccess.task', 'name status');
 
         return cases.map(caseItem => ({
             ...caseItem.toObject(),

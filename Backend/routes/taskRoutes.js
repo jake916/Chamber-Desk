@@ -255,6 +255,9 @@ router.put('/:id', auth, async (req, res) => {
         // Track old status BEFORE updating
         const oldStatus = task.status;
 
+        // Track old case to detect case changes
+        const oldCaseId = task.case ? task.case.toString() : null;
+
         task.name = name || task.name;
         task.description = description || task.description;
         if (caseId) task.case = caseId;
@@ -264,6 +267,28 @@ router.put('/:id', auth, async (req, res) => {
         task.endDate = endDate || task.endDate;
         if (assignedTo) task.assignedTo = assignedTo;
         if (collaborators) task.collaborators = collaborators;
+
+        // Handle case change - revoke access from old case and grant to new case
+        const newCaseId = task.case ? task.case.toString() : null;
+        if (oldCaseId && newCaseId && oldCaseId !== newCaseId) {
+            console.log(`Task ${task._id} case changed from ${oldCaseId} to ${newCaseId} - updating task-based access`);
+
+            // Get all current task members
+            const allMembers = [
+                ...(Array.isArray(task.assignedTo) ? task.assignedTo : task.assignedTo ? [task.assignedTo] : []),
+                ...(task.collaborators || [])
+            ];
+
+            // Revoke access from old case for all members
+            for (const memberId of allMembers) {
+                await revokeTaskBasedAccess(oldCaseId, memberId, task._id);
+            }
+
+            // Grant access to new case for all members
+            for (const memberId of allMembers) {
+                await grantTaskBasedAccess(newCaseId, memberId, task._id);
+            }
+        }
 
         await task.save();
 
@@ -299,12 +324,12 @@ router.put('/:id', auth, async (req, res) => {
         // Handle task-based access based on status changes
         const closedStatuses = ['Completed', 'Cancelled', 'Closed'];
         const activeStatuses = ['To-Do', 'Ongoing', 'Overdue'];
-        
+
         if (status && status !== oldStatus && task.case) {
             const wasClosedBefore = closedStatuses.includes(oldStatus);
             const isClosedNow = closedStatuses.includes(status);
             const isActiveNow = activeStatuses.includes(status);
-            
+
             // If changing TO a closed status, revoke all access
             if (isClosedNow && !wasClosedBefore) {
                 console.log(`Task ${task._id} status changed to ${status} - revoking all task-based access`);
@@ -317,7 +342,7 @@ router.put('/:id', auth, async (req, res) => {
                     ...(Array.isArray(task.assignedTo) ? task.assignedTo : task.assignedTo ? [task.assignedTo] : []),
                     ...(task.collaborators || [])
                 ];
-                
+
                 for (const memberId of allMembers) {
                     await grantTaskBasedAccess(task.case, memberId, task._id);
                 }

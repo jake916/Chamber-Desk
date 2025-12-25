@@ -34,6 +34,15 @@ const RoleSidebar = ({ role = 'admin', navigationItems = [], unreadNotifications
             active: 'bg-green-600',
             hover: 'hover:bg-green-800',
             portalName: 'Lawyer Portal'
+        },
+        paralegal: {
+            bg: 'bg-teal-900',
+            border: 'border-teal-800',
+            text: 'text-teal-400',
+            textLight: 'text-teal-200',
+            active: 'bg-teal-600',
+            hover: 'hover:bg-teal-800',
+            portalName: 'Paralegal Portal'
         }
     };
 

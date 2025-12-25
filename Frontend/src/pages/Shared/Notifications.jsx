@@ -12,6 +12,78 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
     const [showUnreadOnly, setShowUnreadOnly] = useState(false);
     const [datesWithUnread, setDatesWithUnread] = useState([]);
 
+    // Color mapping for Tailwind classes (dynamic classes don't work)
+    const colorClasses = {
+        blue: {
+            primary: {
+                bg50: 'bg-blue-50',
+                bg100: 'bg-blue-100',
+                bg600: 'bg-blue-600',
+                bg700: 'bg-blue-700',
+                text600: 'text-blue-600',
+                text700: 'text-blue-700',
+                ring: 'focus:ring-blue-500',
+                hover: 'hover:bg-blue-700'
+            },
+            secondary: {
+                bg50: 'bg-orange-50',
+                bg100: 'bg-orange-100',
+                bg200: 'bg-orange-200',
+                bg600: 'bg-orange-600',
+                bg700: 'bg-orange-700',
+                text600: 'text-orange-600',
+                border: 'border-orange-200',
+                hover: 'hover:bg-orange-100'
+            }
+        },
+        teal: {
+            primary: {
+                bg50: 'bg-teal-50',
+                bg100: 'bg-teal-100',
+                bg600: 'bg-teal-600',
+                bg700: 'bg-teal-700',
+                text600: 'text-teal-600',
+                text700: 'text-teal-700',
+                ring: 'focus:ring-teal-500',
+                hover: 'hover:bg-teal-700'
+            },
+            secondary: {
+                bg50: 'bg-cyan-50',
+                bg100: 'bg-cyan-100',
+                bg200: 'bg-cyan-200',
+                bg600: 'bg-cyan-600',
+                bg700: 'bg-cyan-700',
+                text600: 'text-cyan-600',
+                border: 'border-cyan-200',
+                hover: 'hover:bg-cyan-100'
+            }
+        },
+        purple: {
+            primary: {
+                bg50: 'bg-purple-50',
+                bg100: 'bg-purple-100',
+                bg600: 'bg-purple-600',
+                bg700: 'bg-purple-700',
+                text600: 'text-purple-600',
+                text700: 'text-purple-700',
+                ring: 'focus:ring-purple-500',
+                hover: 'hover:bg-purple-700'
+            },
+            secondary: {
+                bg50: 'bg-orange-50',
+                bg100: 'bg-orange-100',
+                bg200: 'bg-orange-200',
+                bg600: 'bg-orange-600',
+                bg700: 'bg-orange-700',
+                text600: 'text-orange-600',
+                border: 'border-orange-200',
+                hover: 'hover:bg-orange-100'
+            }
+        }
+    };
+
+    const colors = colorClasses[primaryColor] || colorClasses.blue;
+
     useEffect(() => {
         fetchNotifications();
     }, [selectedDate]);
@@ -114,7 +186,7 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
 
     const getNotificationIcon = (notification) => {
         if (notification.relatedEntity?.entityType === 'Meeting') {
-            return <Calendar className={`w-5 h-5 text-${secondaryColor}-600`} />;
+            return <Calendar className={`w-5 h-5 text-cyan-600`} />;
         }
 
         switch (notification.type) {
@@ -124,11 +196,11 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
                 return <XCircle className="w-5 h-5 text-red-600" />;
             case 'fund_assigned':
             case 'general':
-                return <DollarSign className={`w-5 h-5 text-${primaryColor}-600`} />;
+                return <DollarSign className={`w-5 h-5 text-teal-600`} />;
             case 'fund_overdue':
-                return <AlertCircle className={`w-5 h-5 text-${secondaryColor}-600`} />;
+                return <AlertCircle className={`w-5 h-5 text-cyan-600`} />;
             case 'client_added':
-                return <Users className={`w-5 h-5 text-${primaryColor}-600`} />;
+                return <Users className={`w-5 h-5 text-teal-600`} />;
             case 'client_status_changed':
                 return <UserCheck className="w-5 h-5 text-indigo-600" />;
             case 'case_created':
@@ -138,26 +210,26 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
                 return <Briefcase className="w-5 h-5 text-teal-600" />;
             case 'task_created':
             case 'task_updated':
-                return <CheckSquare className={`w-5 h-5 text-${primaryColor}-600`} />;
+                return <CheckSquare className={`w-5 h-5 text-teal-600`} />;
             case 'task_deleted':
             case 'task_subtask_deleted':
                 return <Trash2 className="w-5 h-5 text-red-600" />;
             case 'task_comment_added':
             case 'task_reply_added':
-                return <MessageSquare className={`w-5 h-5 text-${primaryColor}-600`} />;
+                return <MessageSquare className={`w-5 h-5 text-teal-600`} />;
             case 'task_subtask_added':
                 return <CheckSquare className="w-5 h-5 text-green-600" />;
             case 'task_member_added':
                 return <UserPlus className="w-5 h-5 text-indigo-600" />;
             case 'meeting_created':
             case 'meeting_updated':
-                return <Calendar className={`w-5 h-5 text-${primaryColor}-600`} />;
+                return <Calendar className={`w-5 h-5 text-teal-600`} />;
             case 'meeting_rsvp_accepted':
                 return <CheckCircle className="w-5 h-5 text-green-600" />;
             case 'meeting_rsvp_declined':
                 return <XCircle className="w-5 h-5 text-red-600" />;
             case 'meeting_cancelled':
-                return <XCircle className={`w-5 h-5 text-${secondaryColor}-600`} />;
+                return <XCircle className={`w-5 h-5 text-cyan-600`} />;
             case 'client_complaint_created':
             case 'client_complaint_reply':
             case 'client_complaint_status_changed':
@@ -191,13 +263,13 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
                             value={selectedDate}
                             onChange={(e) => setSelectedDate(e.target.value)}
                             onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                            className={`pl-9 text-black pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-${primaryColor}-500 cursor-pointer w-full sm:w-auto`}
+                            className={`pl-9 text-black pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 cursor-pointer w-full sm:w-auto`}
                         />
                     </div>
                     <button
                         onClick={() => setShowUnreadOnly(!showUnreadOnly)}
                         className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap ${showUnreadOnly
-                            ? `bg-${secondaryColor}-600 text-white hover:bg-${secondaryColor}-700`
+                            ? `bg-cyan-600 text-white hover:bg-cyan-700`
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                             }`}
                     >
@@ -205,7 +277,7 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
                     </button>
                     <button
                         onClick={markAllAsRead}
-                        className={`text-sm text-${primaryColor}-600 hover:text-${primaryColor}-700 font-medium whitespace-nowrap text-center sm:text-left`}
+                        className={`text-sm text-teal-600 hover:text-teal-700 font-medium whitespace-nowrap text-center sm:text-left`}
                     >
                         Mark all as read
                     </button>
@@ -214,10 +286,10 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
 
             {/* Dates with Unread Notifications */}
             {datesWithUnread.length > 0 && (
-                <div className={`bg-${secondaryColor}-50 border border-${secondaryColor}-200 rounded-xl p-4 mb-6`}>
+                <div className={`bg-cyan-50 border border-cyan-200 rounded-xl p-4 mb-6`}>
                     <div className="flex items-start gap-3">
-                        <div className={`p-2 bg-${secondaryColor}-100 rounded-lg`}>
-                            <Bell className={`w-4 h-4 text-${secondaryColor}-600`} />
+                        <div className={`p-2 bg-cyan-100 rounded-lg`}>
+                            <Bell className={`w-4 h-4 text-cyan-600`} />
                         </div>
                         <div className="flex-1">
                             <h3 className="text-sm font-semibold text-gray-900 mb-2">Dates with Unread Notifications</h3>
@@ -228,8 +300,8 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
                                         key={index}
                                         onClick={() => setSelectedDate(date)}
                                         className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-all ${selectedDate === date
-                                            ? `bg-${secondaryColor}-600 text-white shadow-sm`
-                                            : `bg-white text-gray-700 hover:bg-${secondaryColor}-100 border border-${secondaryColor}-200`
+                                            ? `bg-cyan-600 text-white shadow-sm`
+                                            : `bg-white text-gray-700 hover:bg-cyan-100 border border-cyan-200`
                                             }`}
                                     >
                                         {new Date(date).toLocaleDateString('en-US', {
@@ -265,7 +337,7 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
                             .map((notification) => (
                                 <div
                                     key={notification._id}
-                                    className={`p-6 hover:bg-gray-50 transition-colors ${!notification.read ? `bg-${primaryColor}-50/50` : ''}`}
+                                    className={`p-6 hover:bg-gray-50 transition-colors ${!notification.read ? `bg-teal-50/50` : ''}`}
                                 >
                                     <div className="flex gap-4 items-start">
                                         <div className="flex-shrink-0 p-2 bg-white rounded-lg shadow-sm border border-gray-100 mt-1">
@@ -282,14 +354,14 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
                                                     </p>
                                                 </div>
                                                 {!notification.read && (
-                                                    <div className={`w-2 h-2 bg-${primaryColor}-600 rounded-full mt-2 flex-shrink-0`}></div>
+                                                    <div className={`w-2 h-2 bg-teal-600 rounded-full mt-2 flex-shrink-0`}></div>
                                                 )}
                                             </div>
 
                                             {notification.relatedEntity && (
                                                 <button
                                                     onClick={() => handleAction(notification)}
-                                                    className={`mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-${primaryColor}-600 hover:text-${primaryColor}-700 transition-colors`}
+                                                    className={`mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-teal-600 hover:text-teal-700 transition-colors`}
                                                 >
                                                     View Details <ArrowRight className="w-3 h-3" />
                                                 </button>
@@ -306,3 +378,4 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
 };
 
 export default Notifications;
+

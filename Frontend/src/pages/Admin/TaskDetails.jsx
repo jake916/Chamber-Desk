@@ -17,8 +17,8 @@ const TaskDetails = () => {
     // Get user role from localStorage
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const userRole = user.role || 'Admin';
-    const rolePrefix = userRole === 'HOC' ? '/hoc' : userRole === 'Lawyer' ? '/lawyer' : '/admin';
-    const primaryColor = userRole === 'HOC' ? 'purple' : userRole === 'Lawyer' ? 'green' : 'orange';
+    const rolePrefix = userRole === 'HOC' ? '/hoc' : userRole === 'Lawyer' ? '/lawyer' : userRole === 'Paralegal' ? '/paralegal' : '/admin';
+    const primaryColor = userRole === 'HOC' ? 'purple' : userRole === 'Lawyer' ? 'green' : userRole === 'Paralegal' ? 'teal' : 'orange';
 
     const [task, setTask] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -775,7 +775,7 @@ const TaskDetails = () => {
                 {/* Left Column - Case Details and Case Library */}
                 <div className="lg:col-span-2 space-y-6 relative">
                     {/* Case Details Section - Always show, with overlay if no case attached */}
-                    <div className={`bg-${primaryColor}-500 rounded-3xl p-8 text-white ${!task.case ? 'blur-sm' : ''}`}>
+                    <div className={`${userRole === 'HOC' ? 'bg-purple-500' : userRole === 'Lawyer' ? 'bg-green-500' : userRole === 'Paralegal' ? 'bg-teal-500' : 'bg-orange-500'} rounded-3xl p-8 text-white ${!task.case ? 'blur-sm' : ''}`}>
                         <div className="flex items-center gap-3 mb-8">
                             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                                 <Briefcase className="w-6 h-6 text-white" />
@@ -822,9 +822,9 @@ const TaskDetails = () => {
                     <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${!task.case ? 'blur-sm' : ''}`}>
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
-                                <FolderOpen className={`w-5 h-5 text-${primaryColor}-600`} />
+                                <FolderOpen className={`w-5 h-5 ${userRole === 'HOC' ? 'text-purple-600' : userRole === 'Lawyer' ? 'text-green-600' : userRole === 'Paralegal' ? 'text-teal-600' : 'text-orange-600'}`} />
                                 <h3 className="text-lg font-semibold text-gray-900">Case Library</h3>
-                                <span className={`px-2 py-1 text-xs bg-${primaryColor}-100 text-${primaryColor}-700 rounded-full`}>
+                                <span className={`px-2 py-1 text-xs rounded-full ${userRole === 'HOC' ? 'bg-purple-100 text-purple-700' : userRole === 'Lawyer' ? 'bg-green-100 text-green-700' : userRole === 'Paralegal' ? 'bg-teal-100 text-teal-700' : 'bg-orange-100 text-orange-700'}`}>
                                     {caseDocuments.length} {caseDocuments.length === 1 ? 'Document' : 'Documents'}
                                 </span>
                             </div>

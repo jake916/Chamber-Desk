@@ -280,7 +280,33 @@ router.get('/:id', auth, async (req, res) => {
             await caseItem.save(); // Pre-save hook will generate the token
         }
 
-        res.json(caseItem);
+        // Determine access type for non-admin users
+        let accessType = 'direct'; // Default to direct access
+
+        if (!isAdmin) {
+            // Check if user has task-based access to this case
+            const hasTaskAccess = caseItem.taskBasedAccess && caseItem.taskBasedAccess.some(
+                access => access.user.toString() === userId.toString()
+            );
+
+            // Check if user has direct access (assigned lawyer or paralegal)
+            const hasDirectAccess =
+                (caseItem.assignedLawyers && caseItem.assignedLawyers.some(l => l._id.toString() === userId.toString())) ||
+                (caseItem.assignedParalegals && caseItem.assignedParalegals.some(p => p._id.toString() === userId.toString()));
+
+            // If user has task-based access but NOT direct access, mark as task-based
+            if (hasTaskAccess && !hasDirectAccess) {
+                accessType = 'task';
+            }
+        }
+
+        // Add accessType to response
+        const caseResponse = {
+            ...caseItem.toObject(),
+            accessType
+        };
+
+        res.json(caseResponse);
 
     } catch (err) {
         console.error(err.message);

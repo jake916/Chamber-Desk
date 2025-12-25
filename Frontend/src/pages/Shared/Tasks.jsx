@@ -12,8 +12,8 @@ const Tasks = () => {
     // Get user role from localStorage
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const userRole = user.role || 'Admin';
-    const rolePrefix = userRole === 'HOC' ? '/hoc' : userRole === 'Lawyer' ? '/lawyer' : '/admin';
-    const primaryColor = userRole === 'HOC' ? 'purple' : userRole === 'Lawyer' ? 'green' : 'orange';
+    const rolePrefix = userRole === 'HOC' ? '/hoc' : userRole === 'Lawyer' ? '/lawyer' : userRole === 'Paralegal' ? '/paralegal' : '/admin';
+    const primaryColor = userRole === 'HOC' ? 'purple' : userRole === 'Lawyer' ? 'green' : userRole === 'Paralegal' ? 'teal' : 'orange';
 
     const [tasks, setTasks] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -337,8 +337,8 @@ const Tasks = () => {
                                     </div>
                                 ))}
 
-                                {/* Add New Button */}
-                                {column.hasAddNew && (
+                                {/* Add New Button - Only show in My Tasks tab */}
+                                {column.hasAddNew && activeTab === 'my_tasks' && (
                                     <button
                                         onClick={() => {
                                             setInitialStatus(column.id);
