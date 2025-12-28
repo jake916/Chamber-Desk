@@ -12,8 +12,8 @@ const Tasks = () => {
     // Get user role from localStorage
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const userRole = user.role || 'Admin';
-    const rolePrefix = userRole === 'HOC' ? '/hoc' : userRole === 'Lawyer' ? '/lawyer' : userRole === 'Paralegal' ? '/paralegal' : '/admin';
-    const primaryColor = userRole === 'HOC' ? 'purple' : userRole === 'Lawyer' ? 'green' : userRole === 'Paralegal' ? 'teal' : 'orange';
+    const rolePrefix = userRole === 'HOC' ? '/hoc' : userRole === 'Lawyer' ? '/lawyer' : userRole === 'Paralegal' ? '/paralegal' : userRole === 'Manager' ? '/manager' : '/admin';
+    const primaryColor = userRole === 'HOC' ? 'purple' : userRole === 'Lawyer' ? 'green' : userRole === 'Paralegal' ? 'teal' : userRole === 'Manager' ? 'blue' : 'orange';
 
     const [tasks, setTasks] = useState([]);
     const [isLoading, setIsLoading] = useState(true);

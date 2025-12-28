@@ -72,6 +72,8 @@ const notificationSchema = new mongoose.Schema({
             'client_complaint_created',
             'client_complaint_status_changed',
             'client_complaint_reply',
+            'hoc_manager_comment',
+            'broadcast_created',
             'general'
         ],
         required: true
@@ -84,7 +86,7 @@ const notificationSchema = new mongoose.Schema({
     relatedEntity: {
         entityType: {
             type: String,
-            enum: ['Client', 'FundRequisition', 'User', 'Case', 'Document', 'SupportTicket', 'Meeting', 'Task', 'ClientComplaint']
+            enum: ['Client', 'FundRequisition', 'User', 'Case', 'Document', 'SupportTicket', 'Meeting', 'Task', 'ClientComplaint', 'Broadcast']
         },
         entityId: {
             type: mongoose.Schema.Types.ObjectId

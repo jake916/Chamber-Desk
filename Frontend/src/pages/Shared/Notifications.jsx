@@ -234,6 +234,8 @@ const Notifications = ({ basePath = '/admin', primaryColor = 'blue', secondaryCo
             case 'client_complaint_reply':
             case 'client_complaint_status_changed':
                 return <MessageSquare className="w-5 h-5 text-red-600" />;
+            case 'hoc_manager_comment':
+                return <MessageSquare className="w-5 h-5 text-purple-600" />;
             default:
                 return <Bell className="w-5 h-5 text-gray-600" />;
         }

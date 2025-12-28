@@ -135,11 +135,11 @@ const ClientDetails = () => {
     };
 
     const getBasePath = () => {
-        return userRole === 'Admin' ? '/admin' : userRole === 'HOC' ? '/hoc' : '/dashboard';
+        return userRole === 'Admin' ? '/admin' : userRole === 'HOC' ? '/hoc' : userRole === 'Manager' ? '/manager' : '/dashboard';
     };
 
     const getPrimaryColor = () => {
-        return userRole === 'Admin' ? 'orange' : 'purple';
+        return userRole === 'Admin' ? 'orange' : userRole === 'Manager' ? 'blue' : 'purple';
     };
 
     if (isLoading) {
@@ -617,15 +617,17 @@ const ClientDetails = () => {
                                     onClick={() => {
                                         if (userRole === 'Admin') {
                                             navigate(`/admin/cases/${caseItem._id}`);
+                                        } else if (userRole === 'Manager') {
+                                            navigate(`/manager/cases/${caseItem._id}`);
                                         } else if (userRole === 'HOC' && isAssignedToMe) {
                                             navigate(`/hoc/cases/${caseItem._id}`);
                                         }
                                     }}
-                                    className={`border border-gray-200 rounded-lg p-4 transition-colors ${userRole === 'Admin'
-                                            ? 'hover:bg-gray-50 cursor-pointer'
-                                            : isAssignedToMe
-                                                ? 'hover:bg-purple-50 cursor-pointer border-l-4 border-l-purple-500'
-                                                : 'bg-gray-50 opacity-75 cursor-not-allowed'
+                                    className={`border border-gray-200 rounded-lg p-4 transition-colors ${userRole === 'Admin' || userRole === 'Manager'
+                                        ? 'hover:bg-gray-50 cursor-pointer'
+                                        : isAssignedToMe
+                                            ? 'hover:bg-purple-50 cursor-pointer border-l-4 border-l-purple-500'
+                                            : 'bg-gray-50 opacity-75 cursor-not-allowed'
                                         }`}
                                 >
                                     <div className="flex justify-between items-start">
@@ -644,7 +646,7 @@ const ClientDetails = () => {
                                                     )}
                                                 </div>
                                             )}
-                                            {userRole === 'Admin' && (
+                                            {(userRole === 'Admin' || userRole === 'Manager') && (
                                                 <h4 className="font-semibold text-gray-900">{caseItem.caseTitle}</h4>
                                             )}
                                             <p className="text-sm text-gray-600 mt-1 line-clamp-2">{caseItem.summary}</p>

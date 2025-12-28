@@ -101,6 +101,14 @@ const AdminHome = () => {
                 // Split into complaints and feature requests
                 const complaints = tickets.filter(t => t.type === 'Complaint').slice(0, 5);
                 const featureRequests = tickets.filter(t => t.type === 'Feature Request').slice(0, 5);
+                setRecentTickets({ complaints, featureRequests });
+            }
+
+            // Tasks
+            const tasksRes = await fetch(`${API_BASE_URL}/api/tasks/my-tasks`, { headers: { 'x-auth-token': token } });
+            if (tasksRes.ok) {
+                const tasks = await tasksRes.json();
+                const now = new Date();
                 const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
                 const tasksDueSoon = tasks
                     .filter(t => {
@@ -270,73 +278,73 @@ const AdminHome = () => {
                 <LoadingSpinner message="Loading dashboard data..." />
             ) : (
                 <>
-                    {/* Statistics Cards - 2 Columns */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                        {/* Column 1 */}
-                        <div className="space-y-6">
-                            {/* Total Clients */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Total Clients</p>
-                                        <p className="text-3xl font-bold text-gray-900">{stats.totalClients}</p>
-                                    </div>
-                                    <div className="p-3 bg-blue-100 rounded-lg"><Users className="w-6 h-6 text-blue-600" /></div>
+                    {/* Statistics Cards - 3 Columns x 2 Rows */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                        {/* Row 1 */}
+                        {/* Total Clients */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Total Clients</p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.totalClients}</p>
                                 </div>
-                            </div>
-                            {/* Active Clients */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Active Clients</p>
-                                        <p className="text-3xl font-bold text-gray-900">{stats.activeClients}</p>
-                                    </div>
-                                    <div className="p-3 bg-green-100 rounded-lg"><Users className="w-6 h-6 text-green-600" /></div>
-                                </div>
-                            </div>
-                            {/* Fund Requisitions */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Fund Requisitions</p>
-                                        <p className="text-3xl font-bold text-gray-900">{stats.totalFunds}</p>
-                                    </div>
-                                    <div className="p-3 bg-yellow-100 rounded-lg"><DollarSign className="w-6 h-6 text-yellow-600" /></div>
-                                </div>
+                                <div className="p-3 bg-blue-100 rounded-lg"><Users className="w-6 h-6 text-blue-600" /></div>
                             </div>
                         </div>
 
-                        {/* Column 2 */}
-                        <div className="space-y-6">
-                            {/* Total Cases */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Total Cases</p>
-                                        <p className="text-3xl font-bold text-gray-900">{stats.totalCases}</p>
-                                    </div>
-                                    <div className="p-3 bg-purple-100 rounded-lg"><Briefcase className="w-6 h-6 text-purple-600" /></div>
+                        {/* Total Cases */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Total Cases</p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.totalCases}</p>
                                 </div>
+                                <div className="p-3 bg-purple-100 rounded-lg"><Briefcase className="w-6 h-6 text-purple-600" /></div>
                             </div>
-                            {/* Support Tickets */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Support Tickets</p>
-                                        <p className="text-3xl font-bold text-gray-900">{stats.totalTickets}</p>
-                                    </div>
-                                    <div className="p-3 bg-red-100 rounded-lg"><Ticket className="w-6 h-6 text-red-600" /></div>
+                        </div>
+
+                        {/* Active Clients */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Active Clients</p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.activeClients}</p>
                                 </div>
+                                <div className="p-3 bg-green-100 rounded-lg"><Users className="w-6 h-6 text-green-600" /></div>
                             </div>
-                            {/* Documents */}
-                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-gray-600 mb-1">Documents</p>
-                                        <p className="text-3xl font-bold text-gray-900">{stats.totalDocuments}</p>
-                                    </div>
-                                    <div className="p-3 bg-orange-100 rounded-lg"><FileText className="w-6 h-6 text-orange-600" /></div>
+                        </div>
+
+                        {/* Row 2 */}
+                        {/* Fund Requisitions */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Fund Requisitions</p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.totalFunds}</p>
                                 </div>
+                                <div className="p-3 bg-yellow-100 rounded-lg"><DollarSign className="w-6 h-6 text-yellow-600" /></div>
+                            </div>
+                        </div>
+
+                        {/* Support Tickets */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Support Tickets</p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.totalTickets}</p>
+                                </div>
+                                <div className="p-3 bg-red-100 rounded-lg"><Ticket className="w-6 h-6 text-red-600" /></div>
+                            </div>
+                        </div>
+
+                        {/* Documents */}
+                        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm text-gray-600 mb-1">Documents</p>
+                                    <p className="text-3xl font-bold text-gray-900">{stats.totalDocuments}</p>
+                                </div>
+                                <div className="p-3 bg-orange-100 rounded-lg"><FileText className="w-6 h-6 text-orange-600" /></div>
                             </div>
                         </div>
                     </div>

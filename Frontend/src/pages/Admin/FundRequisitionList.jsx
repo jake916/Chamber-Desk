@@ -11,6 +11,11 @@ const FundRequisitionList = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [viewRequisition, setViewRequisition] = useState(null);
 
+    // Get user role and ID
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userRole = user.role;
+    const userId = user.id;
+
     // Assign modal
     const [selectedRequisition, setSelectedRequisition] = useState(null);
     const [selectedManager, setSelectedManager] = useState('');
@@ -25,6 +30,10 @@ const FundRequisitionList = () => {
     const [historyPeriod, setHistoryPeriod] = useState('all');
     const [historyFromDate, setHistoryFromDate] = useState('');
     const [historyToDate, setHistoryToDate] = useState('');
+
+    // Approve/Reject states
+    const [isProcessing, setIsProcessing] = useState(false);
+    const [actionMessage, setActionMessage] = useState({ type: '', text: '' });
 
     useEffect(() => {
         fetchRequisitions();
@@ -130,6 +139,44 @@ const FundRequisitionList = () => {
         }
     };
 
+    const handleApproveReject = async (status) => {
+        setIsProcessing(true);
+        setActionMessage({ type: '', text: '' });
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/funds/${viewRequisition._id}/approve`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({ status })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.msg || 'Failed to process requisition');
+            }
+
+            setActionMessage({
+                type: 'success',
+                text: `Requisition ${status.toLowerCase()} successfully!`
+            });
+
+            setTimeout(() => {
+                setViewRequisition(null);
+                setActionMessage({ type: '', text: '' });
+                fetchRequisitions();
+            }, 1500);
+
+        } catch (err) {
+            setActionMessage({ type: 'error', text: err.message });
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     // Calculate stats
     const totalRequisitions = requisitions.length;
     const totalAmount = requisitions.reduce((sum, req) => sum + req.amount, 0);
@@ -160,6 +207,15 @@ const FundRequisitionList = () => {
 
         return matchesSearch && matchesStatus && matchesUser;
     });
+
+    // For Manager role: separate assigned and other requisitions
+    const assignedToMe = userRole === 'Manager' ? filteredRequisitions.filter(req =>
+        req.assignedTo && (req.assignedTo._id === userId || req.assignedTo === userId)
+    ) : [];
+
+    const otherRequisitions = userRole === 'Manager' ? filteredRequisitions.filter(req =>
+        !req.assignedTo || (req.assignedTo._id !== userId && req.assignedTo !== userId)
+    ) : filteredRequisitions;
 
     // Filter for history
     const getHistoryRequisitions = () => {
@@ -367,10 +423,69 @@ const FundRequisitionList = () => {
                 </div>
             </div>
 
-            {/* Main Requisitions Table */}
+            {/* Manager View: Assigned to Me Section */}
+            {userRole === 'Manager' && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
+                    <div className="p-6 border-b border-gray-100">
+                        <h3 className="text-lg font-semibold text-gray-900">Assigned to Me ({assignedToMe.length})</h3>
+                    </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Amount</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Purpose</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Requested By</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Date</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Status</th>
+                                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan="6" className="px-6 py-8 text-center text-gray-500">Loading...</td>
+                                    </tr>
+                                ) : assignedToMe.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No requisitions assigned to you</td>
+                                    </tr>
+                                ) : (
+                                    assignedToMe.map((req) => (
+                                        <tr key={req._id} className="hover:bg-gray-50">
+                                            <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">{formatCurrency(req.amount)}</td>
+                                            <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">{req.purpose}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{req.requestedBy?.name || 'Unknown'}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{formatDate(req.createdAt)}</td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusBadge(req.status)}`}>
+                                                    {req.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <button
+                                                    onClick={() => setViewRequisition(req)}
+                                                    className="px-3 py-1.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 flex items-center gap-1"
+                                                >
+                                                    <Eye className="w-4 h-4" />
+                                                    View
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            )}
+
+            {/* All Requisitions Table */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
                 <div className="p-6 border-b border-gray-100">
-                    <h3 className="text-lg font-semibold text-gray-900">All Requisitions</h3>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        {userRole === 'Manager' ? `Other Requisitions (${otherRequisitions.length})` : 'All Requisitions'}
+                    </h3>
                 </div>
                 <div className="overflow-x-auto">
                     <table className="w-full">
@@ -389,12 +504,14 @@ const FundRequisitionList = () => {
                                 <tr>
                                     <td colSpan="6" className="px-6 py-8 text-center text-gray-500">Loading...</td>
                                 </tr>
-                            ) : filteredRequisitions.length === 0 ? (
+                            ) : otherRequisitions.length === 0 ? (
                                 <tr>
-                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">No requisitions found</td>
+                                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                                        {userRole === 'Manager' ? 'No other requisitions' : 'No requisitions found'}
+                                    </td>
                                 </tr>
                             ) : (
-                                filteredRequisitions.map((req) => (
+                                otherRequisitions.map((req) => (
                                     <tr key={req._id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap font-semibold text-gray-900">{formatCurrency(req.amount)}</td>
                                         <td className="px-6 py-4 text-sm text-gray-900 max-w-xs">{req.purpose}</td>
@@ -414,7 +531,7 @@ const FundRequisitionList = () => {
                                                     <Eye className="w-4 h-4" />
                                                     View
                                                 </button>
-                                                {req.status === 'Pending' && (
+                                                {req.status === 'Pending' && userRole !== 'Manager' && (
                                                     <button
                                                         onClick={() => setSelectedRequisition(req)}
                                                         className="px-3 py-1.5 bg-orange-600 text-white text-sm font-semibold rounded-lg hover:bg-orange-700"
@@ -693,12 +810,48 @@ const FundRequisitionList = () => {
                             </div>
                         </div>
                         <div className="p-6 border-t border-gray-200">
-                            <button
-                                onClick={() => setViewRequisition(null)}
-                                className="w-full px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700"
-                            >
-                                Close
-                            </button>
+                            {actionMessage.text && (
+                                <div className={`mb-4 p-3 rounded ${actionMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                                    {actionMessage.text}
+                                </div>
+                            )}
+
+                            {/* Show Accept/Deny buttons for Managers viewing assigned requisitions */}
+                            {userRole === 'Manager' &&
+                                viewRequisition.assignedTo &&
+                                (viewRequisition.assignedTo._id === userId || viewRequisition.assignedTo === userId) &&
+                                viewRequisition.status === 'Assigned' ? (
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setViewRequisition(null)}
+                                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
+                                        disabled={isProcessing}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={() => handleApproveReject('Rejected')}
+                                        disabled={isProcessing}
+                                        className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50"
+                                    >
+                                        {isProcessing ? 'Processing...' : 'Deny'}
+                                    </button>
+                                    <button
+                                        onClick={() => handleApproveReject('Approved')}
+                                        disabled={isProcessing}
+                                        className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50"
+                                    >
+                                        {isProcessing ? 'Processing...' : 'Accept'}
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setViewRequisition(null)}
+                                    className="w-full px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700"
+                                >
+                                    Close
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

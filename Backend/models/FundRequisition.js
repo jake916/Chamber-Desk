@@ -15,6 +15,16 @@ const fundRequisitionSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    type: {
+        type: String,
+        enum: ['Office Supplies', 'Travel', 'Legal Fees', 'Court Fees', 'Professional Services', 'Utilities', 'Other'],
+        required: true
+    },
+    urgency: {
+        type: String,
+        enum: ['Low', 'Medium', 'High', 'Critical'],
+        required: true
+    },
     status: {
         type: String,
         enum: ['Pending', 'Assigned', 'Approved', 'Rejected'],

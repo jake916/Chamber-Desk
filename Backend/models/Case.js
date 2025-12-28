@@ -126,7 +126,7 @@ const CaseSchema = new mongoose.Schema({
             },
             authorType: {
                 type: String,
-                enum: ['client', 'hoc', 'lawyer'],
+                enum: ['client', 'hoc', 'lawyer', 'manager'],
                 required: true
             },
             authorName: {
@@ -142,6 +142,37 @@ const CaseSchema = new mongoose.Schema({
                 default: Date.now
             }
         }]
+    }],
+    hocManagerComments: [{
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        authorName: {
+            type: String,
+            required: true
+        },
+        authorRole: {
+            type: String,
+            enum: ['HOC', 'Manager'],
+            required: true
+        },
+        content: {
+            type: String,
+            required: true
+        },
+        replyTo: {
+            type: mongoose.Schema.Types.ObjectId,
+            default: null
+        },
+        mentions: [{
+            type: String
+        }],
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
     }],
     taskBasedAccess: [{
         user: {

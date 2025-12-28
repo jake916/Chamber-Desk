@@ -10,13 +10,15 @@ const { notifyAdmins } = require('../utils/notificationHelper');
 // @desc    Create a fund requisition
 // @access  Private (any authenticated user)
 router.post('/', auth, async (req, res) => {
-    const { amount, purpose } = req.body;
+    const { amount, purpose, type, urgency } = req.body;
 
     try {
         const fundRequisition = new FundRequisition({
             requestedBy: req.user.id,
             amount,
-            purpose
+            purpose,
+            type,
+            urgency
         });
 
         await fundRequisition.save();
@@ -67,11 +69,8 @@ router.get('/', auth, async (req, res) => {
         let query = {};
 
         // Filter based on role
-        if (req.user.role === 'Admin') {
-            // Admin sees all requisitions
-        } else if (req.user.role === 'Manager') {
-            // Managers see requisitions assigned to them
-            query.assignedTo = req.user.id;
+        if (req.user.role === 'Admin' || req.user.role === 'Manager') {
+            // Admin and Manager see all requisitions
         } else {
             // Others see only their own requisitions
             query.requestedBy = req.user.id;

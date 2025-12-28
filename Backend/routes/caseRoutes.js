@@ -173,8 +173,8 @@ router.get('/', auth, async (req, res) => {
         // Get directly assigned cases based on role
         let directCases = [];
 
-        if (user.role === 'Admin' || user.role === 'HOC' || user.role === 'Superadmin') {
-            // Admins, HOC, and Superadmins see all cases
+        if (user.role === 'Admin' || user.role === 'HOC' || user.role === 'Superadmin' || user.role === 'Manager') {
+            // Admins, HOC, Managers, and Superadmins see all cases
             directCases = await Case.find()
                 .populate('client', 'name email')
                 .populate('assignedTo', 'name email')
@@ -264,7 +264,7 @@ router.get('/:id', auth, async (req, res) => {
         const user = await User.findById(userId);
 
         // Admins, HOC, and Superadmins have access to all cases
-        const isAdmin = ['Admin', 'HOC', 'Superadmin'].includes(user.role);
+        const isAdmin = ['Admin', 'HOC', 'Superadmin', 'Manager'].includes(user.role);
 
         if (!isAdmin) {
             // Check if user has any access to this case
@@ -1422,10 +1422,10 @@ router.post('/:id/report/:reportId/reply', auth, async (req, res) => {
             return res.status(400).json({ msg: 'Reply content is required' });
         }
 
-        // Check if user is HOC or Lawyer
+        // Check if user is HOC, Lawyer, or Manager
         const user = await User.findById(req.user.id);
-        if (!user || (user.role !== 'HOC' && user.role !== 'Lawyer')) {
-            return res.status(403).json({ msg: 'Only HOC and Lawyers can reply to client reports' });
+        if (!user || (user.role !== 'HOC' && user.role !== 'Lawyer' && user.role !== 'Manager')) {
+            return res.status(403).json({ msg: 'Only HOC, Lawyers, and Managers can reply to client reports' });
         }
 
         const caseItem = await Case.findById(req.params.id);
@@ -1559,6 +1559,124 @@ router.post('/:id/opposing-counsel', auth, async (req, res) => {
 
     } catch (err) {
         console.error('Update opposing counsel error:', err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   GET /api/cases/:id/hoc-manager-comments
+// @desc    Get all HOC-Manager comments for a case
+// @access  Private (HOC and Manager only)
+router.get('/:id/hoc-manager-comments', auth, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+
+        // Only HOC and Manager can access
+        if (!user || (user.role !== 'HOC' && user.role !== 'Manager')) {
+            return res.status(403).json({ msg: 'Access denied. HOC and Manager only.' });
+        }
+
+        const caseItem = await Case.findById(req.params.id);
+        if (!caseItem) {
+            return res.status(404).json({ msg: 'Case not found' });
+        }
+
+        res.json(caseItem.hocManagerComments || []);
+    } catch (err) {
+        console.error('Fetch HOC-Manager comments error:', err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST /api/cases/:id/hoc-manager-comments
+// @desc    Post a new HOC-Manager comment
+// @access  Private (HOC and Manager only)
+router.post('/:id/hoc-manager-comments', auth, async (req, res) => {
+    try {
+        const { content, replyTo, mentions } = req.body;
+
+        if (!content || !content.trim()) {
+            return res.status(400).json({ msg: 'Comment content is required' });
+        }
+
+        const user = await User.findById(req.user.id);
+
+        // Only HOC and Manager can post
+        if (!user || (user.role !== 'HOC' && user.role !== 'Manager')) {
+            return res.status(403).json({ msg: 'Access denied. HOC and Manager only.' });
+        }
+
+        const caseItem = await Case.findById(req.params.id);
+        if (!caseItem) {
+            return res.status(404).json({ msg: 'Case not found' });
+        }
+
+        // Add comment
+        const newComment = {
+            author: req.user.id,
+            authorName: user.name,
+            authorRole: user.role,
+            content: content.trim(),
+            replyTo: replyTo || null,
+            mentions: mentions || [],
+            createdAt: new Date()
+        };
+
+        caseItem.hocManagerComments.push(newComment);
+        await caseItem.save();
+
+        // Notify all HOCs and Managers about the new comment (including sender with confirmation)
+        try {
+            const recipients = await User.find({ role: { $in: ['HOC', 'Manager'] } });
+            console.log(`📧 Found ${recipients.length} HOC/Manager recipients for notifications`);
+
+            const notifications = recipients.map(recipient => {
+                const isSender = recipient._id.toString() === req.user.id;
+
+                // Check if user was mentioned
+                const wasMentioned = mentions && mentions.some(mention =>
+                    recipient.name.toLowerCase().includes(mention.toLowerCase())
+                );
+
+                // Different message for sender vs others
+                let message;
+                if (isSender) {
+                    message = `Your comment on case "${caseItem.caseTitle}" has been posted`;
+                } else if (wasMentioned) {
+                    message = `${user.name} (${user.role}) mentioned you in a comment on case "${caseItem.caseTitle}"`;
+                } else {
+                    message = `${user.name} (${user.role}) commented on case "${caseItem.caseTitle}"`;
+                }
+
+                console.log(`📧 Creating notification for ${recipient.name} (${recipient.role}): ${message}`);
+
+                return {
+                    recipient: recipient._id,
+                    type: 'hoc_manager_comment',
+                    message: message,
+                    relatedEntity: {
+                        entityType: 'Case',
+                        entityId: caseItem._id
+                    }
+                };
+            });
+
+            if (notifications.length > 0) {
+                const result = await Notification.insertMany(notifications);
+                console.log(`✅ Successfully created ${result.length} notifications`);
+            } else {
+                console.log('⚠️ No notifications to create');
+            }
+        } catch (notifErr) {
+            console.error('❌ Error creating notifications:', notifErr.message);
+            console.error('Full error:', notifErr);
+        }
+
+        res.json({
+            msg: 'Comment posted successfully',
+            comment: newComment
+        });
+    } catch (err) {
+        console.error('Post HOC-Manager comment error:', err.message);
         res.status(500).send('Server Error');
     }
 });

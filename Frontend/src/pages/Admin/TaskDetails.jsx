@@ -17,8 +17,8 @@ const TaskDetails = () => {
     // Get user role from localStorage
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const userRole = user.role || 'Admin';
-    const rolePrefix = userRole === 'HOC' ? '/hoc' : userRole === 'Lawyer' ? '/lawyer' : userRole === 'Paralegal' ? '/paralegal' : '/admin';
-    const primaryColor = userRole === 'HOC' ? 'purple' : userRole === 'Lawyer' ? 'green' : userRole === 'Paralegal' ? 'teal' : 'orange';
+    const rolePrefix = userRole === 'HOC' ? '/hoc' : userRole === 'Lawyer' ? '/lawyer' : userRole === 'Paralegal' ? '/paralegal' : userRole === 'Manager' ? '/manager' : '/admin';
+    const primaryColor = userRole === 'HOC' ? 'purple' : userRole === 'Lawyer' ? 'green' : userRole === 'Paralegal' ? 'teal' : userRole === 'Manager' ? 'blue' : 'orange';
 
     const [task, setTask] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -775,7 +775,7 @@ const TaskDetails = () => {
                 {/* Left Column - Case Details and Case Library */}
                 <div className="lg:col-span-2 space-y-6 relative">
                     {/* Case Details Section - Always show, with overlay if no case attached */}
-                    <div className={`${userRole === 'HOC' ? 'bg-purple-500' : userRole === 'Lawyer' ? 'bg-green-500' : userRole === 'Paralegal' ? 'bg-teal-500' : 'bg-orange-500'} rounded-3xl p-8 text-white ${!task.case ? 'blur-sm' : ''}`}>
+                    <div className={`${userRole === 'HOC' ? 'bg-purple-500' : userRole === 'Lawyer' ? 'bg-green-500' : userRole === 'Paralegal' ? 'bg-teal-500' : userRole === 'Manager' ? 'bg-blue-500' : 'bg-orange-500'} rounded-3xl p-8 text-white ${!task.case ? 'blur-sm' : ''}`}>
                         <div className="flex items-center gap-3 mb-8">
                             <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
                                 <Briefcase className="w-6 h-6 text-white" />
@@ -816,10 +816,10 @@ const TaskDetails = () => {
                                 )}
                             </div>
                         </div>
-                    </div>
+                    </div >
 
                     {/* Case Library Section - Always show, with overlay if no case attached */}
-                    <div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${!task.case ? 'blur-sm' : ''}`}>
+                    < div className={`bg-white rounded-xl shadow-sm border border-gray-200 p-6 ${!task.case ? 'blur-sm' : ''}`}>
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <FolderOpen className={`w-5 h-5 ${userRole === 'HOC' ? 'text-purple-600' : userRole === 'Lawyer' ? 'text-green-600' : userRole === 'Paralegal' ? 'text-teal-600' : 'text-orange-600'}`} />
@@ -838,82 +838,86 @@ const TaskDetails = () => {
                             </button>
                         </div>
 
-                        {loadingDocuments ? (
-                            <div className="flex justify-center items-center h-32">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
-                            </div>
-                        ) : caseDocuments.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-32 text-gray-500">
-                                <FolderOpen size={48} className="text-gray-300 mb-2" />
-                                <p className="text-sm">No documents in this case library yet</p>
-                                <p className="text-xs text-gray-400 mt-1">Click "Add Files" to get started</p>
-                            </div>
-                        ) : (
-                            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
-                                {caseDocuments.map(doc => (
-                                    <div key={doc._id} className="border border-gray-200 rounded-lg p-3 hover:border-orange-300 hover:shadow-sm transition-all">
-                                        <div className="flex items-start gap-3">
-                                            <div className="flex-shrink-0">
-                                                {getFileIcon(doc.type)}
+                        {
+                            loadingDocuments ? (
+                                <div className="flex justify-center items-center h-32">
+                                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-600"></div>
+                                </div>
+                            ) : caseDocuments.length === 0 ? (
+                                <div className="flex flex-col items-center justify-center h-32 text-gray-500">
+                                    <FolderOpen size={48} className="text-gray-300 mb-2" />
+                                    <p className="text-sm">No documents in this case library yet</p>
+                                    <p className="text-xs text-gray-400 mt-1">Click "Add Files" to get started</p>
+                                </div>
+                            ) : (
+                                <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                                    {caseDocuments.map(doc => (
+                                        <div key={doc._id} className="border border-gray-200 rounded-lg p-3 hover:border-orange-300 hover:shadow-sm transition-all">
+                                            <div className="flex items-start gap-3">
+                                                <div className="flex-shrink-0">
+                                                    {getFileIcon(doc.type)}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-medium text-gray-800 truncate text-sm" title={doc.name}>
+                                                        {doc.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-1">
+                                                        {formatSize(doc.size)} • {new Date(doc.createdAt).toLocaleDateString()}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400 mt-1">
+                                                        By: {doc.uploadedBy?.name || 'Unknown'}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p className="font-medium text-gray-800 truncate text-sm" title={doc.name}>
-                                                    {doc.name}
-                                                </p>
-                                                <p className="text-xs text-gray-500 mt-1">
-                                                    {formatSize(doc.size)} • {new Date(doc.createdAt).toLocaleDateString()}
-                                                </p>
-                                                <p className="text-xs text-gray-400 mt-1">
-                                                    By: {doc.uploadedBy?.name || 'Unknown'}
-                                                </p>
+                                            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
+                                                <button
+                                                    onClick={() => window.open(doc.url, '_blank')}
+                                                    className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors"
+                                                >
+                                                    <Download size={14} />
+                                                    Download
+                                                </button>
+                                                <button
+                                                    onClick={() => handleRemoveDocument(doc)}
+                                                    className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors"
+                                                >
+                                                    <Trash2 size={14} />
+                                                    Remove
+                                                </button>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-100">
-                                            <button
-                                                onClick={() => window.open(doc.url, '_blank')}
-                                                className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-green-50 text-green-700 rounded hover:bg-green-100 transition-colors"
-                                            >
-                                                <Download size={14} />
-                                                Download
-                                            </button>
-                                            <button
-                                                onClick={() => handleRemoveDocument(doc)}
-                                                className="flex-1 flex items-center justify-center gap-1 px-3 py-1.5 text-xs bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors"
-                                            >
-                                                <Trash2 size={14} />
-                                                Remove
-                                            </button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
+                                    ))}
+                                </div>
+                            )
+                        }
+                    </div >
 
                     {/* Single overlay message when no case is attached - covers both sections */}
-                    {!task.case && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                            <div className="bg-white rounded-xl shadow-lg px-5 py-4 text-center border-2 border-orange-500 pointer-events-auto">
+                    {
+                        !task.case && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <div className="bg-white rounded-xl shadow-lg px-5 py-4 text-center border-2 border-orange-500 pointer-events-auto">
 
-                                <h3 className="text-base font-bold text-gray-900 mb-1">No Case Attached</h3>
-                                <p className="text-sm text-gray-600 mb-3">This task is not attached to a case</p>
-                                {canEditDelete && (
-                                    <button
-                                        onClick={() => setShowAttachCaseModal(true)}
-                                        className="px-4 py-1.5 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors font-semibold"
-                                    >
-                                        Attach to Case
-                                    </button>
-                                )}
+                                    <h3 className="text-base font-bold text-gray-900 mb-1">No Case Attached</h3>
+                                    <p className="text-sm text-gray-600 mb-3">This task is not attached to a case</p>
+                                    {canEditDelete && (
+                                        <button
+                                            onClick={() => setShowAttachCaseModal(true)}
+                                            className="px-4 py-1.5 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 transition-colors font-semibold"
+                                        >
+                                            Attach to Case
+                                        </button>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
-                </div>
+                        )
+                    }
+                </div >
 
                 {/* Right Column - Subtasks and Task Details Sidebar */}
-                <div className="space-y-6">
+                < div className="space-y-6" >
                     {/* Subtasks Section */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-2">
                                 <CheckSquare className="w-6 h-6 text-orange-600" />
@@ -925,41 +929,45 @@ const TaskDetails = () => {
                         </div>
 
                         {/* Progress Bar */}
-                        {totalSubtasks > 0 && (
-                            <div className="mb-4">
-                                <div className="w-full bg-gray-200 rounded-full h-2">
-                                    <div
-                                        className="bg-orange-600 h-2 rounded-full transition-all duration-300"
-                                        style={{ width: `${progress}%` }}
-                                    />
+                        {
+                            totalSubtasks > 0 && (
+                                <div className="mb-4">
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
+                                        <div
+                                            className="bg-orange-600 h-2 rounded-full transition-all duration-300"
+                                            style={{ width: `${progress}%` }}
+                                        />
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-1">{Math.round(progress)}% complete</p>
                                 </div>
-                                <p className="text-xs text-gray-500 mt-1">{Math.round(progress)}% complete</p>
-                            </div>
-                        )}
+                            )
+                        }
 
                         {/* Add Subtask Input */}
-                        {canManageSubtasks && (
-                            <div className="mb-4">
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={newSubtask}
-                                        onChange={(e) => setNewSubtask(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleAddSubtask()}
-                                        placeholder="Add a new subtask..."
-                                        className="flex-1 px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                                    />
-                                    <button
-                                        onClick={handleAddSubtask}
-                                        disabled={isAddingSubtask || !newSubtask.trim()}
-                                        className="p-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-orange-400 transition-colors"
-                                        title="Add Subtask"
-                                    >
-                                        <Plus className="w-5 h-5" />
-                                    </button>
+                        {
+                            canManageSubtasks && (
+                                <div className="mb-4">
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newSubtask}
+                                            onChange={(e) => setNewSubtask(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleAddSubtask()}
+                                            placeholder="Add a new subtask..."
+                                            className="flex-1 px-3 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                                        />
+                                        <button
+                                            onClick={handleAddSubtask}
+                                            disabled={isAddingSubtask || !newSubtask.trim()}
+                                            className="p-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-orange-400 transition-colors"
+                                            title="Add Subtask"
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )
+                        }
 
                         {/* Subtask List */}
                         <div className="space-y-2">
@@ -1038,10 +1046,10 @@ const TaskDetails = () => {
                                 <p className="text-sm text-gray-500 italic text-center py-4">No subtasks yet</p>
                             )}
                         </div>
-                    </div>
+                    </div >
 
                     {/* Task Info */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6" >
                         <h3 className="text-lg font-semibold text-gray-900 mb-4">Task Details</h3>
                         <div className="space-y-4">
                             {task.case && (
@@ -1138,12 +1146,12 @@ const TaskDetails = () => {
                                 </div>
                             )}
                         </div>
-                    </div>
-                </div>
-            </div>
+                    </div >
+                </div >
+            </div >
 
             {/* Comments Section - Full Width */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
+            < div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6" >
                 <div className="flex items-center gap-3 mb-6">
                     <MessageCircle className="w-6 h-6 text-orange-600" />
                     <h3 className="text-xl font-bold text-gray-900">Comments & Updates</h3>
@@ -1367,10 +1375,10 @@ const TaskDetails = () => {
                         </div>
                     )}
                 </div>
-            </div>
+            </div >
 
             {/* Edit Modal */}
-            <EditTaskModal
+            < EditTaskModal
                 isOpen={showEditModal}
                 onClose={() => setShowEditModal(false)}
                 onSubmit={handleEditSubmit}
@@ -1387,7 +1395,7 @@ const TaskDetails = () => {
             />
 
             {/* Delete Confirmation Modal */}
-            <DeleteTaskModal
+            < DeleteTaskModal
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleDeleteConfirm}
@@ -1396,14 +1404,16 @@ const TaskDetails = () => {
             />
 
             {/* Document Selector Drawer */}
-            {task.case && (
-                <DocumentSelectorDrawer
-                    isOpen={showDocumentDrawer}
-                    onClose={() => setShowDocumentDrawer(false)}
-                    onSelectDocuments={handleAddDocumentsToCase}
-                    caseId={task.case._id}
-                />
-            )}
+            {
+                task.case && (
+                    <DocumentSelectorDrawer
+                        isOpen={showDocumentDrawer}
+                        onClose={() => setShowDocumentDrawer(false)}
+                        onSelectDocuments={handleAddDocumentsToCase}
+                        caseId={task.case._id}
+                    />
+                )
+            }
 
             {/* Remove Document Confirmation Modal */}
             <RemoveDocumentModal
@@ -1425,44 +1435,46 @@ const TaskDetails = () => {
             />
 
             {/* Delete Subtask Confirmation Modal */}
-            {showDeleteSubtaskModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
-                        <div className="p-6">
-                            <div className="flex items-center gap-3 mb-4">
-                                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-                                    <Trash2 className="w-6 h-6 text-red-600" />
+            {
+                showDeleteSubtaskModal && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+                            <div className="p-6">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                        <Trash2 className="w-6 h-6 text-red-600" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-lg font-bold text-gray-900">Delete Subtask?</h3>
+                                        <p className="text-sm text-gray-600">This action cannot be undone</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="text-lg font-bold text-gray-900">Delete Subtask?</h3>
-                                    <p className="text-sm text-gray-600">This action cannot be undone</p>
+                                <p className="text-gray-700 mb-6">
+                                    Are you sure you want to delete this subtask? This will permanently remove it from the task.
+                                </p>
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => {
+                                            setShowDeleteSubtaskModal(false);
+                                            setSubtaskToDelete(null);
+                                        }}
+                                        className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={confirmDeleteSubtask}
+                                        className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
+                                    >
+                                        Delete
+                                    </button>
                                 </div>
-                            </div>
-                            <p className="text-gray-700 mb-6">
-                                Are you sure you want to delete this subtask? This will permanently remove it from the task.
-                            </p>
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={() => {
-                                        setShowDeleteSubtaskModal(false);
-                                        setSubtaskToDelete(null);
-                                    }}
-                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={confirmDeleteSubtask}
-                                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors"
-                                >
-                                    Delete
-                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 };
 

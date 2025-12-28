@@ -5,6 +5,9 @@ import FundRequisitionForm from './components/AdminOfficer/FundRequisitionForm';
 import Login from './pages/Auth/Login';
 import SuperadminDashboard from './pages/Superadmin/SuperadminDashboard';
 import ManagerDashboard from './pages/Managers/ManagerDashboard';
+import ManagerLayout from './pages/Managers/ManagerLayout';
+import ManagerCaseDetails from './pages/Managers/ManagerCaseDetails';
+import ManagerReportThread from './pages/Managers/ManagerReportThread';
 import HOCLayout from './pages/HOC/HOCLayout';
 import HOCHome from './pages/HOC/Home';
 import HOCCaseDetails from './pages/HOC/CaseDetails';
@@ -76,7 +79,26 @@ function App() {
 
         {/* Role-based Routes */}
         <Route path="/superadmin/*" element={<SuperadminDashboard />} />
-        <Route path="/manager/*" element={<ManagerDashboard />} />
+
+        {/* Manager Routes */}
+        <Route path="/manager" element={<ManagerLayout />}>
+          <Route index element={<ManagerDashboard />} />
+          <Route path="clients" element={<ClientManagement />} />
+          <Route path="clients/:id" element={<ClientDetails />} />
+          <Route path="cases" element={<CaseManagement />} />
+          <Route path="cases/:id" element={<ManagerCaseDetails />} />
+          <Route path="cases/:caseId/report/:reportId" element={<ManagerReportThread />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="tasks/:id" element={<TaskDetails />} />
+          <Route path="meetings" element={<Meetings />} />
+          <Route path="broadcasts" element={<Broadcast />} />
+          <Route path="funds" element={<FundRequisitionList />} />
+          <Route path="funds/request" element={<FundRequisitionForm />} />
+          <Route path="documents" element={<Documents />} />
+          <Route path="support" element={<Support />} />
+          <Route path="complaints/:id" element={<ComplaintDetails />} />
+          <Route path="notifications" element={<Notifications basePath="/manager" primaryColor="blue" secondaryColor="cyan" />} />
+        </Route>
 
         {/* HOC Routes */}
         <Route path="/hoc" element={<HOCLayout />}>

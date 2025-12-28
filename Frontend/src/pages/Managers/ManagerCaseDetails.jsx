@@ -1,41 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-    ArrowLeft, User, Calendar, Briefcase, MapPin, Scale, FileText,
-    Users, AlertCircle, CheckCircle, Building, FolderOpen, Plus, Trash2, Download,
-    Image as ImageIcon, File, Video, Music, X, UserPlus, MessageCircle, ChevronRight
+    ArrowLeft, User, Briefcase, AlertCircle, CheckCircle,
+    FolderOpen, Plus, Download, Image as ImageIcon, File, Video, Music, FileText, Scale,
+    MessageCircle, ChevronRight
 } from 'lucide-react';
 import axios from 'axios';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
 import CaseReports from '../../components/AdminOfficer/CaseReports';
 import DocumentSelectorDrawer from '../../components/DocumentSelectorDrawer';
-import ClientReportModal from '../../components/AdminOfficer/ClientReportModal';
 import OpposingCounselSection from '../../components/AdminOfficer/OpposingCounselSection';
+import FloatingChatButton from '../../components/Shared/FloatingChatButton';
+import CaseCommentsPanel from '../../components/Shared/CaseCommentsPanel';
 import API_BASE_URL from '../../config/api';
 
-const LawyerCaseDetails = () => {
+const ManagerCaseDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [caseData, setCaseData] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [message, setMessage] = useState({ type: '', text: '' });
     const [showDocumentDrawer, setShowDocumentDrawer] = useState(false);
+    const [showCommentsPanel, setShowCommentsPanel] = useState(false);
+    const [unreadCommentsCount, setUnreadCommentsCount] = useState(0);
     const [caseDocuments, setCaseDocuments] = useState([]);
     const [loadingDocuments, setLoadingDocuments] = useState(false);
-    const [showRemoveModal, setShowRemoveModal] = useState(false);
-    const [documentToRemove, setDocumentToRemove] = useState(null);
-    const [showClientReportModal, setShowClientReportModal] = useState(false);
-    const [isUpdating, setIsUpdating] = useState(false);
-
-    // Paralegal assignment states
-    const [showParalegalModal, setShowParalegalModal] = useState(false);
-    const [paralegalUsers, setParalegalUsers] = useState([]);
-    const [selectedParalegals, setSelectedParalegals] = useState([]);
 
     useEffect(() => {
         fetchCaseDetails();
         fetchCaseDocuments();
-        fetchParalegals();
     }, [id]);
 
     const fetchCaseDetails = async () => {
@@ -49,7 +42,6 @@ const LawyerCaseDetails = () => {
             if (response.ok) {
                 const data = await response.json();
                 setCaseData(data);
-                setSelectedParalegals(data.assignedParalegals?.map(p => p._id) || []);
             } else {
                 console.error('Failed to fetch case details');
             }
@@ -74,175 +66,20 @@ const LawyerCaseDetails = () => {
         setLoadingDocuments(false);
     };
 
-    const fetchParalegals = async () => {
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/users/paralegals`, {
-                headers: { 'x-auth-token': token }
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setParalegalUsers(data);
-            }
-        } catch (err) {
-            console.error('Error fetching paralegals:', err);
-        }
-    };
-
-    const handleAssignParalegals = async () => {
-        setIsUpdating(true);
-        setMessage({ type: '', text: '' });
-
-        try {
-            const token = localStorage.getItem('token');
-            const currentCount = caseData.assignedParalegals?.length || 0;
-            const newCount = selectedParalegals.length;
-
-            const response = await fetch(`${API_BASE_URL}/api/cases/${id}/assign-paralegals`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token
-                },
-                body: JSON.stringify({ paralegalIds: selectedParalegals })
-            });
-
-            if (response.ok) {
-                let successMessage = 'Paralegals updated successfully!';
-                if (newCount === 0) successMessage = 'Paralegals removed successfully!';
-                else if (newCount > currentCount) successMessage = 'Paralegals assigned successfully!';
-                else if (newCount < currentCount) successMessage = 'Paralegals removed successfully!';
-
-                setMessage({ type: 'success', text: successMessage });
-                setShowParalegalModal(false);
-                setTimeout(() => {
-                    fetchCaseDetails();
-                }, 500);
-            } else {
-                const data = await response.json();
-                setMessage({ type: 'error', text: data.msg || 'Failed to update paralegals' });
-            }
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Error updating paralegals' });
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-
-    const handlePostClientReport = async ({ subject, content }) => {
-        setIsUpdating(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE_URL}/api/cases/${id}/client-report`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token
-                },
-                body: JSON.stringify({ subject, content })
-            });
-
-            if (response.ok) {
-                setMessage({ type: 'success', text: 'Client report posted successfully' });
-                setShowClientReportModal(false);
-                fetchCaseDetails();
-            } else {
-                const data = await response.json();
-                setMessage({ type: 'error', text: data.msg || 'Failed to post client report' });
-            }
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Error posting client report' });
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-
-    const toggleParalegal = (paralegalId) => {
-        setSelectedParalegals(prev =>
-            prev.includes(paralegalId)
-                ? prev.filter(id => id !== paralegalId)
-                : [...prev, paralegalId]
-        );
-    };
-
-    const handleRemoveParalegal = async (paralegalId) => {
-        setIsUpdating(true);
-        setMessage({ type: '', text: '' });
-
-        try {
-            const token = localStorage.getItem('token');
-            const updatedParalegals = caseData.assignedParalegals
-                .filter(p => p._id !== paralegalId)
-                .map(p => p._id);
-
-            const response = await fetch(`${API_BASE_URL}/api/cases/${id}/assign-paralegals`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-auth-token': token
-                },
-                body: JSON.stringify({ paralegalIds: updatedParalegals })
-            });
-
-            if (response.ok) {
-                setMessage({ type: 'success', text: 'Paralegal removed successfully!' });
-                fetchCaseDetails();
-            } else {
-                const data = await response.json();
-                setMessage({ type: 'error', text: data.msg || 'Failed to remove paralegal' });
-            }
-        } catch (err) {
-            setMessage({ type: 'error', text: 'Error removing paralegal' });
-        } finally {
-            setIsUpdating(false);
-        }
-    };
-
     const handleAddDocumentsToCase = async (selectedDocs) => {
         try {
             const token = localStorage.getItem('token');
-
-            // Link each document to the case
             for (const doc of selectedDocs) {
-                await axios.put(
-                    `${API_BASE_URL}/api/documents/${doc._id}/link-to-case`,
+                await axios.put(`${API_BASE_URL}/api/documents/${doc._id}/link-to-case`,
                     { caseId: id },
                     { headers: { 'x-auth-token': token } }
                 );
             }
-
-            // Refresh the case documents to get the full document details
-            await fetchCaseDocuments();
-            setShowDocumentDrawer(false);
-        } catch (error) {
-            console.error('Error adding documents to case:', error);
-            alert('Failed to add documents to case');
-        }
-    };
-
-    const handleRemoveDocument = (doc) => {
-        setDocumentToRemove(doc);
-        setShowRemoveModal(true);
-    };
-
-    const confirmRemoveDocument = async () => {
-        if (!documentToRemove) return;
-
-        try {
-            const token = localStorage.getItem('token');
-            await axios.put(`${API_BASE_URL}/api/documents/${documentToRemove._id}/unlink-from-case`, {}, {
-                headers: { 'x-auth-token': token }
-            });
-            setMessage({ type: 'success', text: 'Document removed from case library' });
+            setMessage({ type: 'success', text: `${selectedDocs.length} document(s) added to case library` });
             fetchCaseDocuments();
-            setShowRemoveModal(false);
-            setDocumentToRemove(null);
         } catch (err) {
-            console.error('Error removing document:', err);
-            setMessage({ type: 'error', text: 'Failed to remove document' });
-            setShowRemoveModal(false);
-            setDocumentToRemove(null);
+            console.error('Error adding documents to case:', err);
+            setMessage({ type: 'error', text: 'Failed to add documents to case' });
         }
     };
 
@@ -269,7 +106,7 @@ const LawyerCaseDetails = () => {
     const getFileIcon = (type) => {
         if (!type) return <File className="w-6 h-6 text-gray-500" />;
         const t = type.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif'].includes(t)) return <ImageIcon className="w-6 h-6 text-green-500" />;
+        if (['jpg', 'jpeg', 'png', 'gif'].includes(t)) return <ImageIcon className="w-6 h-6 text-blue-500" />;
         if (['pdf'].includes(t)) return <FileText className="w-6 h-6 text-red-500" />;
         if (['doc', 'docx'].includes(t)) return <FileText className="w-6 h-6 text-blue-500" />;
         if (['ppt', 'pptx'].includes(t)) return <FileText className="w-6 h-6 text-orange-500" />;
@@ -318,66 +155,6 @@ const LawyerCaseDetails = () => {
                 </div>
             </div>
 
-            {/* Temporary Access Notice for Task-Based Access */}
-            {caseData.accessType === 'task' && (
-                <div className="mb-6 bg-amber-50 border-l-4 border-amber-500 rounded-lg p-4 shadow-sm">
-                    <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                        <div className="flex-1">
-                            <h3 className="text-sm font-bold text-amber-900 mb-1">⚠️ Temporary Access - Limited Permissions</h3>
-                            <p className="text-sm text-amber-800 leading-relaxed">
-                                You have <strong>task-based access</strong> to this case. Your access is temporary and will be removed once the task is completed, cancelled, or you are removed from the task.
-                                You can <strong>view case details and documents</strong>, but you <strong>cannot assign paralegals or send client reports</strong>.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Quick Actions */}
-            <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {/* Only show Client Report for cases with direct access, not task-based access */}
-                    {caseData.accessType !== 'task' && (
-                        <button
-                            onClick={() => setShowClientReportModal(true)}
-                            className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3"
-                        >
-                            <div className="p-3 bg-white/20 rounded-lg"><FileText className="w-6 h-6" /></div>
-                            <span className="font-semibold text-sm text-center">Client Report</span>
-                        </button>
-                    )}
-
-                    <button
-                        onClick={() => setShowDocumentDrawer(true)}
-                        className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3"
-                    >
-                        <div className="p-3 bg-white/20 rounded-lg"><Plus className="w-6 h-6" /></div>
-                        <span className="font-semibold text-sm text-center">Upload Document</span>
-                    </button>
-
-                    {/* Only show Assign Paralegal for cases with direct access, not task-based access */}
-                    {caseData.accessType !== 'task' && (
-                        <button
-                            onClick={() => setShowParalegalModal(true)}
-                            className="bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3"
-                        >
-                            <div className="p-3 bg-white/20 rounded-lg"><UserPlus className="w-6 h-6" /></div>
-                            <span className="font-semibold text-sm text-center">Assign Paralegal</span>
-                        </button>
-                    )}
-
-                    <button
-                        onClick={() => navigate(`/lawyer/cases`)}
-                        className="bg-gradient-to-br from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3"
-                    >
-                        <div className="p-3 bg-white/20 rounded-lg"><FolderOpen className="w-6 h-6" /></div>
-                        <span className="font-semibold text-sm text-center">All Cases</span>
-                    </button>
-                </div>
-            </div>
-
             {/* Message Alert */}
             {message.text && (
                 <div className={`mb-6 p-4 rounded-lg flex items-start gap-3 ${message.type === 'success'
@@ -393,59 +170,64 @@ const LawyerCaseDetails = () => {
                 </div>
             )}
 
-            {/* Case Overview and Client Information - Side by Side */}
+            {/* Case Overview and Client Information */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                {/* Case Overview - LEFT */}
+                {/* Case Overview */}
                 <div className="bg-white rounded-xl shadow-sm p-6">
                     <div className="flex flex-col lg:flex-row gap-6">
-                        {/* Case Icon Section */}
                         <div className="flex flex-col items-center text-center lg:border-r lg:border-gray-200 lg:pr-6">
-                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mb-3 shadow-xl border-4 border-gray-700">
+                            <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center mb-3 shadow-xl border-4 border-blue-100">
                                 <Briefcase className="w-16 h-16 text-white" />
                             </div>
-                            <h3 className="text-xl font-bold text-black mb-1">{caseData.caseTitle}</h3>
+                            <h3 className="text-xl font-bold text-gray-900 mb-1">{caseData.caseTitle}</h3>
                             <span className={`px-3 py-1 text-xs rounded-full font-medium ${getStatusColor(caseData.status)}`}>
                                 {caseData.status}
                             </span>
                         </div>
 
-                        {/* Case Details Section */}
                         <div className="flex-1">
-                            <h4 className="text-base font-semibold text-black mb-3 flex items-center gap-2">
-                                <Briefcase className="w-4 h-4 text-green-400" />
+                            <h4 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                <Briefcase className="w-4 h-4 text-blue-500" />
                                 Case Overview
                             </h4>
                             <div className="space-y-3">
                                 <div>
-                                    <p className="text-xs text-black mb-1">Case Type</p>
-                                    <span className="inline-block px-2 py-1 text-xs bg-blue-500 text-white rounded-full">
+                                    <p className="text-xs text-gray-600 mb-1">Case Type</p>
+                                    <span className="inline-block px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
                                         {caseData.caseType}
                                     </span>
                                 </div>
                                 {caseData.subCategory && (
                                     <div>
-                                        <p className="text-xs text-black mb-1">Sub-category</p>
-                                        <p className="text-sm font-medium text-black">{caseData.subCategory}</p>
+                                        <p className="text-xs text-gray-600 mb-1">Sub-category</p>
+                                        <p className="text-sm font-medium text-gray-900">{caseData.subCategory}</p>
                                     </div>
                                 )}
                                 <div>
-                                    <p className="text-xs text-black mb-1">Date Issue Started</p>
-                                    <p className="text-sm font-medium text-black">{formatDate(caseData.dateIssueStarted)}</p>
+                                    <p className="text-xs text-gray-600 mb-1">Date Issue Started</p>
+                                    <p className="text-sm font-medium text-gray-900">{formatDate(caseData.dateIssueStarted)}</p>
                                 </div>
                                 <div>
-                                    <p className="text-xs text-black mb-1">Assigned Paralegals</p>
+                                    <p className="text-xs text-gray-600 mb-1">Assigned Lawyers</p>
+                                    {caseData.assignedLawyers && caseData.assignedLawyers.length > 0 ? (
+                                        <div className="flex flex-wrap gap-1">
+                                            {caseData.assignedLawyers.map((lawyer, idx) => (
+                                                <span key={idx} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
+                                                    {lawyer.name}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 italic">Not Assigned</p>
+                                    )}
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-600 mb-1">Assigned Paralegals</p>
                                     {caseData.assignedParalegals && caseData.assignedParalegals.length > 0 ? (
                                         <div className="flex flex-wrap gap-1">
                                             {caseData.assignedParalegals.map((paralegal, idx) => (
-                                                <span key={idx} className="inline-flex items-center gap-1 px-2 py-1 text-xs bg-green-500 text-white rounded-full">
+                                                <span key={idx} className="px-2 py-1 text-xs bg-cyan-100 text-cyan-800 rounded-full">
                                                     {paralegal.name}
-                                                    <button
-                                                        onClick={() => handleRemoveParalegal(paralegal._id)}
-                                                        className="ml-1 hover:bg-green-600 rounded-full p-0.5 transition-colors"
-                                                        title="Remove paralegal"
-                                                    >
-                                                        <X className="w-3 h-3" />
-                                                    </button>
                                                 </span>
                                             ))}
                                         </div>
@@ -458,43 +240,41 @@ const LawyerCaseDetails = () => {
                     </div>
                 </div>
 
-                {/* Client Information - RIGHT */}
+                {/* Client Information */}
                 {caseData.client && (
                     <div className="bg-white rounded-xl shadow-sm p-6">
                         <div className="flex flex-col lg:flex-row gap-6">
-                            {/* Profile Section */}
                             <div className="flex flex-col items-center text-center lg:border-r lg:border-gray-200 lg:pr-6">
-                                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-500 to-green-600 flex items-center justify-center mb-3 shadow-xl border-4 border-gray-700">
+                                <div className="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-3 shadow-xl border-4 border-purple-100">
                                     <span className="text-4xl font-bold text-white">
                                         {caseData.client.name.charAt(0).toUpperCase()}
                                     </span>
                                 </div>
-                                <h3 className="text-xl font-bold text-black mb-1">{caseData.client.name}</h3>
+                                <h3 className="text-xl font-bold text-gray-900 mb-1">{caseData.client.name}</h3>
                                 <p className="text-green-600 text-xs font-medium">Active Client</p>
                             </div>
 
-                            {/* Details Section */}
                             <div className="flex-1">
-                                <h4 className="text-base font-semibold text-black mb-3 flex items-center gap-2">
-                                    <User className="w-4 h-4 text-blue-400" />
+                                <h4 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                    <User className="w-4 h-4 text-purple-500" />
                                     Client Details
                                 </h4>
                                 <div className="space-y-3">
                                     <div>
                                         <p className="text-xs text-gray-600 mb-1">Email Address</p>
-                                        <p className="text-sm font-medium text-black">{caseData.client.email}</p>
+                                        <p className="text-sm font-medium text-gray-900">{caseData.client.email}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-600 mb-1">Phone Number</p>
-                                        <p className="text-sm font-medium text-black">{caseData.client.phone || 'N/A'}</p>
+                                        <p className="text-sm font-medium text-gray-900">{caseData.client.phone || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-600 mb-1">Address</p>
-                                        <p className="text-sm font-medium text-black">{caseData.client.address || 'N/A'}</p>
+                                        <p className="text-sm font-medium text-gray-900">{caseData.client.address || 'N/A'}</p>
                                     </div>
                                     <div>
                                         <p className="text-xs text-gray-600 mb-1">Occupation</p>
-                                        <p className="text-sm font-medium text-black">{caseData.client.occupation || 'N/A'}</p>
+                                        <p className="text-sm font-medium text-gray-900">{caseData.client.occupation || 'N/A'}</p>
                                     </div>
                                 </div>
                             </div>
@@ -506,23 +286,19 @@ const LawyerCaseDetails = () => {
             {/* Case Details */}
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Case Details</h3>
-
                 <div className="space-y-4">
                     <div>
                         <p className="text-sm font-semibold text-gray-700 mb-2">Date Issue Started</p>
                         <p className="text-sm text-gray-900">{formatDate(caseData.dateIssueStarted)}</p>
                     </div>
-
                     <div>
                         <p className="text-sm font-semibold text-gray-700 mb-2">Summary of Issue</p>
                         <p className="text-sm text-gray-900 whitespace-pre-wrap">{caseData.summary || 'N/A'}</p>
                     </div>
-
                     <div>
                         <p className="text-sm font-semibold text-gray-700 mb-2">Expected Outcome / Client Objective</p>
                         <p className="text-sm text-gray-900">{caseData.clientObjective || 'N/A'}</p>
                     </div>
-
                     <OpposingCounselSection
                         opposingCounselHistory={caseData.opposingCounselHistory}
                         onUpdateClick={null}
@@ -532,10 +308,9 @@ const LawyerCaseDetails = () => {
                 </div>
             </div>
 
-            {/* Parties and Witnesses - Side by Side */}
+            {/* Parties and Witnesses */}
             {(caseData.parties?.length > 0 || caseData.witnesses?.length > 0) && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                    {/* Parties Involved */}
                     {caseData.parties && caseData.parties.length > 0 && (
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Parties Involved</h3>
@@ -566,14 +341,13 @@ const LawyerCaseDetails = () => {
                         </div>
                     )}
 
-                    {/* Witnesses */}
                     {caseData.witnesses && caseData.witnesses.length > 0 && (
                         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                             <h3 className="text-lg font-semibold text-gray-900 mb-4">Witnesses</h3>
                             <div className="space-y-3">
                                 {caseData.witnesses.map((witness, index) => (
                                     <div key={index} className="border border-gray-200 rounded-lg p-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                             <div>
                                                 <p className="text-xs text-gray-600">Name</p>
                                                 <p className="text-sm font-medium text-gray-900">{witness.name || 'N/A'}</p>
@@ -582,9 +356,9 @@ const LawyerCaseDetails = () => {
                                                 <p className="text-xs text-gray-600">Contact</p>
                                                 <p className="text-sm font-medium text-gray-900">{witness.contact || 'N/A'}</p>
                                             </div>
-                                            <div>
-                                                <p className="text-xs text-gray-600">Relationship</p>
-                                                <p className="text-sm font-medium text-gray-900">{witness.relationship || 'N/A'}</p>
+                                            <div className="md:col-span-2">
+                                                <p className="text-xs text-gray-600">Statement</p>
+                                                <p className="text-sm font-medium text-gray-900">{witness.statement || 'N/A'}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -595,16 +369,16 @@ const LawyerCaseDetails = () => {
                 </div>
             )}
 
-            {/* Court Information (Read Only) */}
+            {/* Court Information */}
             {caseData.inCourt && caseData.courtInfo && caseData.courtInfo.length > 0 ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                     {/* Current Court Status */}
-                    <div className="bg-white rounded-xl shadow-sm border border-green-100 p-6">
+                    <div className="bg-white rounded-xl shadow-sm border border-blue-100 p-6">
                         <div className="flex justify-between items-start mb-4">
                             <div className="flex items-center gap-2">
-                                <Scale className="w-5 h-5 text-green-600" />
+                                <Scale className="w-5 h-5 text-blue-600" />
                                 <h3 className="text-lg font-semibold text-gray-900">Current Court Status</h3>
-                                <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded font-medium">
+                                <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded font-medium">
                                     {caseData.courtInfo.length === 1 ? '1st Court Date' :
                                         caseData.courtInfo.length === 2 ? '2nd Court Date' :
                                             caseData.courtInfo.length === 3 ? '3rd Court Date' :
@@ -703,77 +477,73 @@ const LawyerCaseDetails = () => {
                 </div>
             )}
 
-            {/* Case Reports & Updates and Case Library - Side by Side */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                {/* Case Reports Section */}
-                <div>
-                    <CaseReports caseId={id} />
-                </div>
 
-                {/* Case Library Section */}
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
-                            <FolderOpen className="w-5 h-5 text-green-600" />
-                            <h3 className="text-lg font-semibold text-gray-900">Case Library</h3>
-                            <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
-                                {caseDocuments.length} {caseDocuments.length === 1 ? 'Document' : 'Documents'}
+            {/* Case Library */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
+                <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                        <FolderOpen className="w-5 h-5 text-blue-600" />
+                        <h3 className="text-lg font-semibold text-gray-900">Case Library</h3>
+                        {caseDocuments.length > 0 && (
+                            <span className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full font-medium">
+                                {caseDocuments.length}
                             </span>
-                        </div>
-                        <button
-                            onClick={() => setShowDocumentDrawer(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                            <Plus size={20} />
-                            Add Files
-                        </button>
+                        )}
                     </div>
-
-                    {loadingDocuments ? (
-                        <div className="flex justify-center items-center h-32">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                        </div>
-                    ) : caseDocuments.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-32 text-gray-500">
-                            <FolderOpen className="w-12 h-12 text-gray-300 mb-2" />
-                            <p>No documents in case library</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2">
-                            {caseDocuments.map((doc) => (
-                                <div key={doc._id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                                    <div className="flex items-start gap-3">
-                                        <div className="flex-shrink-0">
-                                            {getFileIcon(doc.type)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900 truncate">{doc.name}</p>
-                                            <p className="text-xs text-gray-500 mt-1">{formatSize(doc.size)} • {new Date(doc.createdAt).toLocaleDateString()}</p>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <a
-                                                href={doc.url}
-                                                download
-                                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                                            >
-                                                <Download className="w-4 h-4" />
-                                            </a>
-                                            <button
-                                                onClick={() => handleRemoveDocument(doc)}
-                                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <button
+                        onClick={() => setShowDocumentDrawer(true)}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add Documents
+                    </button>
                 </div>
+
+                {loadingDocuments ? (
+                    <div className="text-center py-8">
+                        <p className="text-gray-500">Loading documents...</p>
+                    </div>
+                ) : caseDocuments.length === 0 ? (
+                    <div className="text-center py-8">
+                        <FolderOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                        <p className="text-gray-500">No documents in case library</p>
+                        <p className="text-sm text-gray-400 mt-1">Click "Add Documents" to upload files</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {caseDocuments.map((doc) => (
+                            <div key={doc._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                <div className="flex items-start gap-3">
+                                    {getFileIcon(doc.type)}
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-900 truncate">{doc.name}</p>
+                                        <p className="text-xs text-gray-500 mt-1">{formatSize(doc.size)}</p>
+                                        <p className="text-xs text-gray-400 mt-1">
+                                            {formatDate(doc.createdAt)}
+                                        </p>
+                                    </div>
+                                    <a
+                                        href={doc.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                        title="Download"
+                                    >
+                                        <Download className="w-4 h-4" />
+                                    </a>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
 
-            {/* Client Reports & Discussions Section */}
+
+
+            {/* Case Reports & Updates */}
+            <CaseReports caseId={id} />
+
+            {/* Client Reports & Discussions */}
             {caseData.clientReports && caseData.clientReports.length > 0 && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 mb-6">
                     <div className="flex items-center gap-2 mb-4">
@@ -784,7 +554,7 @@ const LawyerCaseDetails = () => {
                         {[...caseData.clientReports].reverse().map((report) => (
                             <div
                                 key={report._id}
-                                onClick={() => navigate(`/lawyer/cases/${id}/report/${report._id}`)}
+                                onClick={() => navigate(`/manager/cases/${id}/report/${report._id}`)}
                                 className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-100 rounded-lg p-4 hover:shadow-md transition-all cursor-pointer group"
                             >
                                 <div className="flex items-start justify-between mb-2">
@@ -823,120 +593,31 @@ const LawyerCaseDetails = () => {
                 </div>
             )}
 
-            {/* Paralegal Assignment Modal */}
-            {showParalegalModal && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full p-6">
-                        <div className="flex justify-between items-center mb-6">
-                            <div className="flex items-center gap-3">
-                                <div className="p-2 bg-green-50 text-green-600 rounded-lg">
-                                    <UserPlus size={24} />
-                                </div>
-                                <h3 className="text-xl font-bold text-gray-900">Assign Paralegals</h3>
-                            </div>
-                            <button
-                                onClick={() => setShowParalegalModal(false)}
-                                className="text-gray-400 hover:text-gray-600 transition-colors"
-                            >
-                                <X size={24} />
-                            </button>
-                        </div>
-
-                        <div className="mb-6">
-                            <p className="text-sm text-gray-600 mb-4">Select paralegals to assign to this case:</p>
-                            <div className="space-y-2 max-h-96 overflow-y-auto">
-                                {paralegalUsers.map((paralegal) => (
-                                    <label
-                                        key={paralegal._id}
-                                        className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
-                                    >
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedParalegals.includes(paralegal._id)}
-                                            onChange={() => toggleParalegal(paralegal._id)}
-                                            className="w-4 h-4 text-green-600 rounded focus:ring-green-500"
-                                        />
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900">{paralegal.name}</p>
-                                            <p className="text-xs text-gray-500">{paralegal.email}</p>
-                                        </div>
-                                    </label>
-                                ))}
-                            </div>
-                        </div>
-
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => setShowParalegalModal(false)}
-                                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleAssignParalegals}
-                                disabled={isUpdating}
-                                className="flex-1 px-4 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                {isUpdating ? 'Assigning...' : 'Assign Paralegals'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Client Report Modal */}
-            <ClientReportModal
-                isOpen={showClientReportModal}
-                onClose={() => setShowClientReportModal(false)}
-                onSave={handlePostClientReport}
-                isLoading={isUpdating}
-            />
-
             {/* Document Selector Drawer */}
             {showDocumentDrawer && (
                 <DocumentSelectorDrawer
                     isOpen={showDocumentDrawer}
                     onClose={() => setShowDocumentDrawer(false)}
                     onSelectDocuments={handleAddDocumentsToCase}
-
+                    excludeDocuments={caseDocuments.map(d => d._id)}
                 />
             )}
+                        {/* Floating Chat Button */}
+            <FloatingChatButton
+                onClick={() => setShowCommentsPanel(true)}
+                unreadCount={unreadCommentsCount}
+                primaryColor="blue"
+            />
 
-            {/* Remove Document Confirmation Modal */}
-            {showRemoveModal && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
-                        <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2 bg-red-50 text-red-600 rounded-lg">
-                                <AlertCircle size={24} />
-                            </div>
-                            <h3 className="text-xl font-bold text-gray-900">Remove Document</h3>
-                        </div>
-                        <p className="text-gray-600 mb-6">
-                            Are you sure you want to remove "{documentToRemove?.fileName}" from this case library?
-                        </p>
-                        <div className="flex gap-3">
-                            <button
-                                onClick={() => {
-                                    setShowRemoveModal(false);
-                                    setDocumentToRemove(null);
-                                }}
-                                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={confirmRemoveDocument}
-                                className="flex-1 px-4 py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
-                            >
-                                Remove
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Comments Panel */}
+            <CaseCommentsPanel
+                caseId={id}
+                isOpen={showCommentsPanel}
+                onClose={() => setShowCommentsPanel(false)}
+                userRole="Manager"
+            />
         </div>
     );
 };
 
-export default LawyerCaseDetails;
+export default ManagerCaseDetails;

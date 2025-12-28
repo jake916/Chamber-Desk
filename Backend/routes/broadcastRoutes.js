@@ -9,37 +9,6 @@ const User = require('../models/User');
 // @access  Private
 router.get('/', auth, async (req, res) => {
     try {
-        // Seed logic: Check if any broadcasts exist
-        const count = await Broadcast.countDocuments();
-        if (count === 0) {
-            // Find a user to be the sender (e.g., the current user or any admin)
-            // For seeding, we'll just use the requesting user if possible, or find one
-            let senderId = req.user.id;
-
-            const seedData = [
-                {
-                    title: 'Welcome to the New Dashboard',
-                    message: 'We are excited to introduce the new Chamber Desk dashboard. Please explore the new features and let us know your feedback.',
-                    sender: senderId,
-                    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2) // 2 days ago
-                },
-                {
-                    title: 'System Maintenance Scheduled',
-                    message: 'Please be advised that system maintenance is scheduled for this Saturday from 10:00 PM to 2:00 AM. The system will be unavailable during this time.',
-                    sender: senderId,
-                    createdAt: new Date(Date.now() - 1000 * 60 * 60 * 5) // 5 hours ago
-                },
-                {
-                    title: 'Q4 Town Hall Meeting',
-                    message: 'Join us for the Q4 Town Hall meeting next Friday. We will be discussing the quarterly results and upcoming goals for the next year. Attendance is mandatory for all department heads.',
-                    sender: senderId,
-                    createdAt: new Date() // Just now
-                }
-            ];
-
-            await Broadcast.insertMany(seedData);
-            }
-
         const broadcasts = await Broadcast.find()
             .populate('sender', 'name email')
             .sort({ createdAt: -1 });
@@ -47,7 +16,69 @@ router.get('/', auth, async (req, res) => {
         res.json(broadcasts);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('Server Error');
+        res.status(500).json({ msg: 'Server Error', error: err.message });
+    }
+});
+
+// @route   POST /api/broadcasts
+// @desc    Create a new broadcast (Manager only)
+// @access  Private (Manager only)
+router.post('/', auth, async (req, res) => {
+    try {
+        const { title, message } = req.body;
+
+        // Get current user
+        const currentUser = await User.findById(req.user.id);
+
+        if (!currentUser) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Check if user is a Manager
+        if (currentUser.role !== 'Manager') {
+            return res.status(403).json({ msg: 'Only Managers can create broadcasts' });
+        }
+
+        // Validate input
+        if (!title || !message) {
+            return res.status(400).json({ msg: 'Title and message are required' });
+        }
+
+        // Create new broadcast
+        const newBroadcast = new Broadcast({
+            title,
+            message,
+            sender: req.user.id,
+            recipients: 'All'
+        });
+
+        const broadcast = await newBroadcast.save();
+
+        // Populate sender info before returning
+        await broadcast.populate('sender', 'name email');
+
+        // Create notifications for all users
+        const Notification = require('../models/Notification');
+        const allUsers = await User.find(); // All users including the sender
+
+        const notifications = allUsers.map(user => ({
+            recipient: user._id,
+            type: 'broadcast_created',
+            message: `New broadcast from ${currentUser.name}: "${title}"`,
+            relatedEntity: {
+                entityType: 'Broadcast',
+                entityId: broadcast._id
+            }
+        }));
+
+        if (notifications.length > 0) {
+            await Notification.insertMany(notifications);
+        }
+
+        res.json(broadcast);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).json({ msg: 'Server Error', error: err.message });
     }
 });
 

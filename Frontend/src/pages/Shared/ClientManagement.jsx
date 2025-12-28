@@ -109,11 +109,11 @@ const ClientManagement = () => {
     };
 
     const getBasePath = () => {
-        return userRole === 'Admin' ? '/admin' : userRole === 'HOC' ? '/hoc' : '/dashboard';
+        return userRole === 'Admin' ? '/admin' : userRole === 'HOC' ? '/hoc' : userRole === 'Manager' ? '/manager' : '/dashboard';
     };
 
     const getPrimaryColor = () => {
-        return userRole === 'Admin' ? 'orange' : 'purple';
+        return userRole === 'Admin' ? 'orange' : userRole === 'Manager' ? 'blue' : 'purple';
     };
 
     const primaryColor = getPrimaryColor();

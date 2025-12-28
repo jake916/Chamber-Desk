@@ -13,6 +13,8 @@ import CourtDetailsModal from '../../components/AdminOfficer/CourtDetailsModal';
 import UpdateOpposingCounselModal from '../../components/AdminOfficer/UpdateOpposingCounselModal';
 import OpposingCounselSection from '../../components/AdminOfficer/OpposingCounselSection';
 import ClientReportModal from '../../components/AdminOfficer/ClientReportModal';
+import FloatingChatButton from '../../components/Shared/FloatingChatButton';
+import CaseCommentsPanel from '../../components/Shared/CaseCommentsPanel';
 import API_BASE_URL from '../../config/api';
 
 const CaseDetails = () => {
@@ -36,6 +38,8 @@ const CaseDetails = () => {
     const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
     const [showCounselModal, setShowCounselModal] = useState(false);
     const [documentToRemove, setDocumentToRemove] = useState(null);
+    const [showCommentsPanel, setShowCommentsPanel] = useState(false);
+    const [unreadCommentsCount, setUnreadCommentsCount] = useState(0);
 
     // Paralegal assignment states
     const [showParalegalModal, setShowParalegalModal] = useState(false);
@@ -1287,6 +1291,20 @@ const CaseDetails = () => {
                     </div>
                 </div>
             )}
+                        {/* Floating Chat Button */}
+            <FloatingChatButton
+                onClick={() => setShowCommentsPanel(true)}
+                unreadCount={unreadCommentsCount}
+                primaryColor="purple"
+            />
+
+            {/* Comments Panel */}
+            <CaseCommentsPanel
+                caseId={id}
+                isOpen={showCommentsPanel}
+                onClose={() => setShowCommentsPanel(false)}
+                userRole="HOC"
+            />
         </div >
     );
 };

@@ -21,7 +21,7 @@ const FundRequisitionForm = () => {
     const [requisitionType, setRequisitionType] = useState(''); // Type of Expense
     const [selectedCase, setSelectedCase] = useState('');
     const [selectedClient, setSelectedClient] = useState('');
-    const [urgency, setUrgency] = useState('Normal');
+    const [urgency, setUrgency] = useState('Low');
     const [purpose, setPurpose] = useState('');
     const [amount, setAmount] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -157,13 +157,13 @@ const FundRequisitionForm = () => {
                             required
                         >
                             <option value="">Select expense type…</option>
-                            <option value="Case-Related">Case-Related</option>
-                            <option value="Court Filing">Court Filing</option>
-                            <option value="Client Meeting">Client Meeting</option>
-                            <option value="Logistics / Transport">Logistics / Transport</option>
-                            <option value="Investigation / Research">Investigation / Research</option>
                             <option value="Office Supplies">Office Supplies</option>
-                            <option value="Administrative">Administrative</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Legal Fees">Legal Fees</option>
+                            <option value="Court Fees">Court Fees</option>
+                            <option value="Professional Services">Professional Services</option>
+                            <option value="Utilities">Utilities</option>
+                            <option value="Other">Other</option>
                         </select>
                     </div>
 
@@ -214,10 +214,12 @@ const FundRequisitionForm = () => {
                             value={urgency}
                             onChange={(e) => setUrgency(e.target.value)}
                             className={`w-full text-black border border-gray-300 rounded-lg p-2 focus:ring-2 focus:ring-${themeColor}-500`}
+                            required
                         >
-                            <option value="Normal">Normal</option>
-                            <option value="Urgent">Urgent</option>
-                            <option value="Very Urgent">Very Urgent</option>
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Critical">Critical</option>
                         </select>
                     </div>
 

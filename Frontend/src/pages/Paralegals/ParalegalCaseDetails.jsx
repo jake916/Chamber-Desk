@@ -215,9 +215,6 @@ const ParalegalCaseDetails = () => {
             // Refresh the case documents to get the full document details
             await fetchCaseDocuments();
             setShowDocumentDrawer(false);
-
-            // Show success message
-            console.log(`${selectedDocs.length} document(s) added to case library`);
         } catch (error) {
             console.error('Error adding documents to case:', error);
             alert('Failed to add documents to case');
