@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, DollarSign, Briefcase, Bell, TrendingUp, Calendar, UserPlus, Plus, Upload, FileText, Ticket, ArrowRight, CheckSquare, Clock, Radio, X, CalendarIcon, Video, MapPin, Link as LinkIcon, User, Pencil, Trash2 } from 'lucide-react';
+import { Users, DollarSign, Briefcase, Bell, TrendingUp, Calendar, UserPlus, Plus, Upload, FileText, Ticket, ArrowRight, CheckSquare, Clock, Radio, X, CalendarIcon, Video, MapPin, Link as LinkIcon, User, Pencil, Trash2, Activity } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
 import ScheduleMeetingModal from '../../components/Modals/ScheduleMeetingModal';
@@ -233,46 +233,83 @@ const AdminHome = () => {
         <div>
             <div className="mb-6 flex items-center justify-between">
                 <h1 className="text-3xl font-bold text-gray-900">Welcome Admin, {userName}</h1>
-                <button
-                    onClick={() => navigate('/admin/notifications')}
-                    className="hidden md:block relative p-3 rounded-full hover:bg-gray-100 transition-colors"
-                    title="Notifications"
-                >
-                    <Bell className="w-6 h-6 text-gray-700" />
-                    {unreadCount > 0 && (
-                        <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                            {unreadCount}
-                        </span>
-                    )}
-                </button>
+                <div className="flex items-center gap-4">
+                    <button
+                        onClick={() => navigate('/admin/notifications')}
+                        className="hidden md:block relative p-3 rounded-full hover:bg-gray-100 transition-colors"
+                        title="Notifications"
+                    >
+                        <Bell className="w-6 h-6 text-gray-700" />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                {unreadCount}
+                            </span>
+                        )}
+                    </button>
+                    <div className="text-right hidden md:block border border-gray-200 rounded p-3">
+                        <p className="text-sm font-medium text-gray-900">
+                            {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                        </p>
+                    </div>
+                </div>
             </div>
 
-            {/* Action Center */}
+
+            {/* Quick Actions */}
             <div className="mb-8">
-                <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
-                    <button onClick={() => navigate('/admin/clients/add')} className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3">
-                        <div className="p-3 bg-white/20 rounded-lg"><UserPlus className="w-6 h-6" /></div>
-                        <span className="font-semibold text-sm">Add Client</span>
+                <h2 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-green-600" />
+                    Quick Actions
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <button onClick={() => navigate('/admin/clients/add')} className="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-200 group text-left">
+                        <div className="p-3 rounded-lg bg-blue-100 text-blue-600 mr-4 group-hover:scale-110 transition-transform">
+                            <UserPlus className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900">Add Client</h3>
+                            <p className="text-sm text-gray-500">Create a new client</p>
+                        </div>
                     </button>
-                    <button onClick={() => navigate('funds/request')} className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3">
-                        <div className="p-3 bg-white/20 rounded-lg"><DollarSign className="w-6 h-6" /></div>
-                        <span className="font-semibold text-sm">Request Funds</span>
+                    <button onClick={() => navigate('funds/request')} className="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-200 group text-left">
+                        <div className="p-3 rounded-lg bg-green-100 text-green-600 mr-4 group-hover:scale-110 transition-transform">
+                            <DollarSign className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900">Request Funds</h3>
+                            <p className="text-sm text-gray-500">Submit a fund requisition</p>
+                        </div>
                     </button>
-                    <button onClick={() => navigate('/admin/documents')} className="bg-gradient-to-br from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3">
-                        <div className="p-3 bg-white/20 rounded-lg"><Upload className="w-6 h-6" /></div>
-                        <span className="font-semibold text-sm">Upload Document</span>
+                    <button onClick={() => navigate('/admin/documents')} className="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-200 group text-left">
+                        <div className="p-3 rounded-lg bg-orange-100 text-orange-600 mr-4 group-hover:scale-110 transition-transform">
+                            <Upload className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900">Upload Document</h3>
+                            <p className="text-sm text-gray-500">Upload new files</p>
+                        </div>
                     </button>
-                    <button onClick={() => setShowMeetingModal(true)} className="bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3">
-                        <div className="p-3 bg-white/20 rounded-lg"><Calendar className="w-6 h-6" /></div>
-                        <span className="font-semibold text-sm">Schedule Meeting</span>
+                    <button onClick={() => setShowMeetingModal(true)} className="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-200 group text-left">
+                        <div className="p-3 rounded-lg bg-purple-100 text-purple-600 mr-4 group-hover:scale-110 transition-transform">
+                            <Calendar className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900">Schedule Meeting</h3>
+                            <p className="text-sm text-gray-500">Set up a new meeting</p>
+                        </div>
                     </button>
-                    <button onClick={() => setShowTaskModal(true)} className="bg-gradient-to-br from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white rounded-xl p-6 shadow-md hover:shadow-lg transition-all flex flex-col items-center gap-3">
-                        <div className="p-3 bg-white/20 rounded-lg"><CheckSquare className="w-6 h-6" /></div>
-                        <span className="font-semibold text-sm">Add Task</span>
+                    <button onClick={() => setShowTaskModal(true)} className="flex items-center p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-all duration-200 group text-left">
+                        <div className="p-3 rounded-lg bg-blue-100 text-blue-600 mr-4 group-hover:scale-110 transition-transform">
+                            <CheckSquare className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h3 className="font-semibold text-gray-900">Add Task</h3>
+                            <p className="text-sm text-gray-500">Create a new task</p>
+                        </div>
                     </button>
                 </div>
             </div>
+
 
             {isLoading ? (
                 <LoadingSpinner message="Loading dashboard data..." />

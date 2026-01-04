@@ -74,18 +74,25 @@ const AdminDashboard = () => {
                         <Menu className="w-6 h-6" />
                     </button>
                     <h1 className="font-bold text-black text-lg">Chamber Desk</h1>
-                    <button
-                        onClick={() => window.location.href = '/admin/notifications'}
-                        className="relative p-2 text-gray-600"
-                        title="Notifications"
-                    >
-                        <Bell className="w-6 h-6" />
-                        {unreadNotifications > 0 && (
-                            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                {unreadNotifications > 9 ? '9+' : unreadNotifications}
-                            </span>
-                        )}
-                    </button>
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => window.location.href = '/admin/notifications'}
+                            className="relative p-2 text-gray-600"
+                            title="Notifications"
+                        >
+                            <Bell className="w-6 h-6" />
+                            {unreadNotifications > 0 && (
+                                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                    {unreadNotifications > 9 ? '9+' : unreadNotifications}
+                                </span>
+                            )}
+                        </button>
+                        <div className="text-right hidden md:block border border-gray-200 rounded p-3">
+                            <p className="text-sm font-medium text-gray-900">
+                                {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                            </p>
+                        </div>
+                    </div>
                 </header>
 
                 {/* Content Area - Renders child routes */}

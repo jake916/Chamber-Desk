@@ -5,6 +5,7 @@ import FundRequisitionForm from './components/AdminOfficer/FundRequisitionForm';
 import Login from './pages/Auth/Login';
 import SuperadminDashboard from './pages/Superadmin/SuperadminDashboard';
 import ManagerDashboard from './pages/Managers/ManagerDashboard';
+import ManagerFunds from './pages/Managers/ManagerFunds';
 import ManagerLayout from './pages/Managers/ManagerLayout';
 import ManagerCaseDetails from './pages/Managers/ManagerCaseDetails';
 import ManagerReportThread from './pages/Managers/ManagerReportThread';
@@ -22,6 +23,7 @@ import LawyerCaseDetails from './pages/Lawyers/LawyerCaseDetails';
 import LawyerReportThread from './pages/Lawyers/LawyerReportThread';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import AdminHome from './pages/Admin/AdminHome';
+import AdminReportThread from './pages/Admin/AdminReportThread';
 import ClientManagement from './pages/Shared/ClientManagement'; // Shared component
 import AddClientForm from './components/AdminOfficer/AddClientForm';
 import ClientDetails from './pages/Shared/ClientDetails'; // Shared component
@@ -92,7 +94,7 @@ function App() {
           <Route path="tasks/:id" element={<TaskDetails />} />
           <Route path="meetings" element={<Meetings />} />
           <Route path="broadcasts" element={<Broadcast />} />
-          <Route path="funds" element={<FundRequisitionList />} />
+          <Route path="funds" element={<ManagerFunds />} />
           <Route path="funds/request" element={<FundRequisitionForm />} />
           <Route path="documents" element={<Documents />} />
           <Route path="support" element={<Support />} />
@@ -149,6 +151,7 @@ function App() {
           <Route path="cases/add" element={<AddCaseForm />} />
           <Route path="cases/edit/:id" element={<EditCaseForm />} />
           <Route path="cases/:id" element={<CaseDetails />} />
+          <Route path="cases/:caseId/report/:reportId" element={<AdminReportThread />} />
           <Route path="funds" element={<FundRequisitionList />} />
           <Route path="funds/request" element={<FundRequisitionForm />} />
           <Route path="notifications" element={<Notifications basePath="/admin" primaryColor="blue" secondaryColor="orange" />} />

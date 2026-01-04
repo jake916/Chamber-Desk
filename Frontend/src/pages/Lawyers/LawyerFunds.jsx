@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, User, Calendar, CheckCircle, XCircle, Clock, Send, Plus, Search, Filter, Eye } from 'lucide-react';
+import { DollarSign, User, Calendar, CheckCircle, XCircle, Clock, Send, Plus, Search, Filter, Eye, MessageCircle } from 'lucide-react';
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
 import API_BASE_URL from '../../config/api';
 
@@ -9,6 +9,11 @@ const LawyerFunds = () => {
     const [requisitions, setRequisitions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [viewRequisition, setViewRequisition] = useState(null);
+
+    // Discussion states
+    const [discussionContent, setDiscussionContent] = useState('');
+    const [isSubmittingDiscussion, setIsSubmittingDiscussion] = useState(false);
+    const [discussionMessage, setDiscussionMessage] = useState({ type: '', text: '' });
 
     // Filter states
     const [searchQuery, setSearchQuery] = useState('');
@@ -65,6 +70,14 @@ const LawyerFunds = () => {
     const deniedReqs = requisitions.filter(r => r.status === 'Rejected');
     const deniedCount = deniedReqs.length;
     const deniedAmount = deniedReqs.reduce((sum, req) => sum + req.amount, 0);
+
+    const queryingReqs = requisitions.filter(r => r.status === 'Querying');
+    const queryingCount = queryingReqs.length;
+    const queryingAmount = queryingReqs.reduce((sum, req) => sum + req.amount, 0);
+
+    const closedReqs = requisitions.filter(r => r.status === 'Closed');
+    const closedCount = closedReqs.length;
+    const closedAmount = closedReqs.reduce((sum, req) => sum + req.amount, 0);
 
     // Filter requisitions for main list
     const filteredRequisitions = requisitions.filter(req => {
@@ -143,11 +156,48 @@ const LawyerFunds = () => {
     const getStatusBadge = (status) => {
         const config = {
             'Pending': 'bg-yellow-100 text-yellow-800',
+            'Querying': 'bg-amber-100 text-amber-800',
             'Assigned': 'bg-blue-100 text-blue-800',
             'Approved': 'bg-green-100 text-green-800',
-            'Rejected': 'bg-red-100 text-red-800'
+            'Rejected': 'bg-red-100 text-red-800',
+            'Closed': 'bg-gray-100 text-gray-800'
         };
         return config[status] || 'bg-gray-100 text-gray-800';
+    };
+
+    const handleDiscuss = async () => {
+        if (!discussionContent.trim()) return;
+
+        setIsSubmittingDiscussion(true);
+        setDiscussionMessage({ type: '', text: '' });
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/funds/${viewRequisition._id}/discuss`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify({ content: discussionContent })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.msg || 'Failed to post reply');
+            }
+
+            const data = await response.json();
+            setViewRequisition(data.fundRequisition);
+            setDiscussionContent('');
+            setDiscussionMessage({ type: 'success', text: 'Reply posted successfully!' });
+            fetchRequisitions();
+
+        } catch (err) {
+            setDiscussionMessage({ type: 'error', text: err.message });
+        } finally {
+            setIsSubmittingDiscussion(false);
+        }
     };
 
     return (
@@ -213,11 +263,11 @@ const LawyerFunds = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Assigned</p>
-                                    <p className="text-2xl font-bold text-purple-600">{assignedCount}</p>
+                                    <p className="text-2xl font-bold text-green-600">{assignedCount}</p>
                                     <p className="text-xs text-gray-500 mt-1">{formatCurrency(assignedAmount)}</p>
                                 </div>
                                 <div className="p-3 bg-purple-100 rounded-lg">
-                                    <Send className="w-6 h-6 text-purple-600" />
+                                    <Send className="w-6 h-6 text-green-600" />
                                 </div>
                             </div>
                         </div>
@@ -259,9 +309,11 @@ const LawyerFunds = () => {
                                 >
                                     <option value="All">All Statuses</option>
                                     <option value="Pending">Pending</option>
+                                    <option value="Querying">Querying</option>
                                     <option value="Assigned">Assigned</option>
                                     <option value="Approved">Approved</option>
                                     <option value="Rejected">Rejected</option>
+                                    <option value="Closed">Closed</option>
                                 </select>
                             </div>
                         </div>
@@ -504,6 +556,73 @@ const LawyerFunds = () => {
                                         <p className="text-gray-900 whitespace-pre-wrap">{viewRequisition.purpose}</p>
                                     </div>
                                 </div>
+
+                                {/* Closure Reason */}
+                                {viewRequisition.closureReason && (
+                                    <div className="p-6 border-t border-gray-200 bg-red-50">
+                                        <p className="text-sm font-medium text-red-900 mb-2">Closure Reason</p>
+                                        <p className="text-red-800 whitespace-pre-wrap">{viewRequisition.closureReason}</p>
+                                    </div>
+                                )}
+
+                                {/* Discussion Thread */}
+                                {viewRequisition.discussions && viewRequisition.discussions.length > 0 && (
+                                    <div className="p-6 border-t border-gray-200">
+                                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Discussion Thread</h4>
+                                        <div className="space-y-4 mb-4">
+                                            {viewRequisition.discussions.map((discussion, index) => (
+                                                <div key={index} className="bg-gray-50 p-4 rounded-lg">
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 mb-2">
+                                                                <p className="font-semibold text-gray-900">
+                                                                    {discussion.author?.name || 'Unknown'}
+                                                                </p>
+                                                                <span className="text-xs text-gray-500">
+                                                                    {discussion.author?.role}
+                                                                </span>
+                                                                <span className="text-xs text-gray-400">•</span>
+                                                                <span className="text-xs text-gray-500">
+                                                                    {formatDate(discussion.createdAt)}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-gray-800 whitespace-pre-wrap">{discussion.content}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        {/* Reply Input (only for Querying status) */}
+                                        {viewRequisition.status === 'Querying' && (
+                                            <div className="mt-4">
+                                                {discussionMessage.text && (
+                                                    <div className={`mb-3 p-3 rounded ${discussionMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                                                        {discussionMessage.text}
+                                                    </div>
+                                                )}
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Your Reply
+                                                </label>
+                                                <textarea
+                                                    value={discussionContent}
+                                                    onChange={(e) => setDiscussionContent(e.target.value)}
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-black resize-none"
+                                                    rows="3"
+                                                    placeholder="Type your reply here..."
+                                                />
+                                                <button
+                                                    onClick={handleDiscuss}
+                                                    disabled={isSubmittingDiscussion || !discussionContent.trim()}
+                                                    className="mt-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50"
+                                                >
+                                                    {isSubmittingDiscussion ? 'Posting...' : 'Post Reply'}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
                                 <div className="p-6 border-t border-gray-200">
                                     <button
                                         onClick={() => setViewRequisition(null)}

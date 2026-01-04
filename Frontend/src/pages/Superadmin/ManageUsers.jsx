@@ -18,6 +18,8 @@ const ManageUsers = () => {
     const [editingUser, setEditingUser] = useState(null);
     const [changingPasswordUser, setChangingPasswordUser] = useState(null);
     const [deletingUser, setDeletingUser] = useState(null);
+    const [resettingPinUser, setResettingPinUser] = useState(null);
+    const [isResettingPin, setIsResettingPin] = useState(false);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -88,6 +90,36 @@ const ManageUsers = () => {
     const handleUserDeleted = (deletedUserId) => {
         setUsers(users.filter(user => user._id !== deletedUserId));
         setDeletingUser(null);
+    };
+
+    const handleResetPin = async () => {
+        if (!resettingPinUser) return;
+
+        setIsResettingPin(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/auth/reset-approval-pin/${resettingPinUser._id}`, {
+                method: 'PUT',
+                headers: {
+                    'x-auth-token': token
+                }
+            });
+
+            if (response.ok) {
+                // Success - close modal
+                setResettingPinUser(null);
+                // Optionally show a success toast here
+                alert('PIN reset successfully');
+            } else {
+                const error = await response.json();
+                alert(error.msg || 'Failed to reset PIN');
+            }
+        } catch (err) {
+            console.error('Error resetting PIN:', err);
+            alert('Failed to reset PIN');
+        } finally {
+            setIsResettingPin(false);
+        }
     };
 
     const filteredUsers = users.filter(user => {
@@ -253,6 +285,18 @@ const ManageUsers = () => {
                                                         <Key className="w-4 h-4" />
                                                         Change Password
                                                     </button>
+                                                    {user.role === 'Manager' && (
+                                                        <button
+                                                            onClick={() => {
+                                                                setResettingPinUser(user);
+                                                                setActiveActionDropdown(null);
+                                                            }}
+                                                            className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                                                        >
+                                                            <Key className="w-4 h-4" />
+                                                            Reset Requisition PIN
+                                                        </button>
+                                                    )}
                                                     <div className="border-t border-gray-100 my-1"></div>
                                                     <button
                                                         onClick={() => {
@@ -356,6 +400,42 @@ const ManageUsers = () => {
                             onSuccess={handleUserDeleted}
                             onCancel={() => setDeletingUser(null)}
                         />
+                    </div>
+                </div>
+            )}
+
+            {/* Reset PIN Confirmation Modal */}
+            {resettingPinUser && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+                        <div className="p-6 border-b border-gray-200">
+                            <h3 className="text-xl font-bold text-gray-900">Reset Requisition PIN</h3>
+                        </div>
+                        <div className="p-6">
+                            <p className="text-gray-600 mb-4">
+                                Are you sure you want to reset the requisition PIN for <span className="font-semibold">{resettingPinUser.name}</span>?
+                            </p>
+                            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                                <p className="text-sm text-amber-800">
+                                    This action will immediately invalidate their current PIN. They will need to create a new one to approve funds.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-gray-200 flex gap-3">
+                            <button
+                                onClick={() => setResettingPinUser(null)}
+                                className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleResetPin}
+                                disabled={isResettingPin}
+                                className="flex-1 px-4 py-2 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 disabled:opacity-50"
+                            >
+                                {isResettingPin ? 'Resetting...' : 'Yes, Reset PIN'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

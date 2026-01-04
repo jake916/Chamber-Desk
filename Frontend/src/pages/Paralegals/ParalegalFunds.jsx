@@ -4,7 +4,7 @@ import { DollarSign, User, Calendar, CheckCircle, XCircle, Clock, Send, Plus, Se
 import LoadingSpinner from '../../components/AdminOfficer/LoadingSpinner';
 import API_BASE_URL from '../../config/api';
 
-const Funds = () => {
+const ParalegalFunds = () => {
     const navigate = useNavigate();
     const [requisitions, setRequisitions] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -158,7 +158,7 @@ const Funds = () => {
             'Pending': 'bg-yellow-100 text-yellow-800',
             'Querying': 'bg-amber-100 text-amber-800',
             'Assigned': 'bg-blue-100 text-blue-800',
-            'Approved': 'bg-green-100 text-green-800',
+            'Approved': 'bg-teal-100 text-teal-800',
             'Rejected': 'bg-red-100 text-red-800',
             'Closed': 'bg-gray-100 text-gray-800'
         };
@@ -203,15 +203,15 @@ const Funds = () => {
     return (
         <div className='p-6'>
             {isLoading ? (
-                <LoadingSpinner message="Loading fund requisitions..." color="purple" />
+                <LoadingSpinner message="Loading fund requisitions..." color="teal" />
             ) : (
                 <>
                     {/* Header */}
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-2xl font-bold text-gray-900">Fund Requisitions</h2>
                         <button
-                            onClick={() => navigate('/hoc/funds/request')}
-                            className="px-6 py-2.5 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                            onClick={() => navigate('/paralegal/funds/request')}
+                            className="px-6 py-2.5 bg-teal-600 text-white font-semibold rounded-lg hover:bg-teal-700 transition-colors flex items-center gap-2"
                         >
                             <Plus className="w-5 h-5" />
                             Request Funds
@@ -237,11 +237,11 @@ const Funds = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Approved</p>
-                                    <p className="text-2xl font-bold text-green-600">{approvedCount}</p>
+                                    <p className="text-2xl font-bold text-teal-600">{approvedCount}</p>
                                     <p className="text-xs text-gray-500 mt-1">{formatCurrency(approvedAmount)}</p>
                                 </div>
-                                <div className="p-3 bg-green-100 rounded-lg">
-                                    <CheckCircle className="w-6 h-6 text-green-600" />
+                                <div className="p-3 bg-teal-100 rounded-lg">
+                                    <CheckCircle className="w-6 h-6 text-teal-600" />
                                 </div>
                             </div>
                         </div>
@@ -263,11 +263,11 @@ const Funds = () => {
                             <div className="flex items-center justify-between">
                                 <div>
                                     <p className="text-sm text-gray-600 mb-1">Assigned</p>
-                                    <p className="text-2xl font-bold text-purple-600">{assignedCount}</p>
+                                    <p className="text-2xl font-bold text-teal-600">{assignedCount}</p>
                                     <p className="text-xs text-gray-500 mt-1">{formatCurrency(assignedAmount)}</p>
                                 </div>
-                                <div className="p-3 bg-purple-100 rounded-lg">
-                                    <Send className="w-6 h-6 text-purple-600" />
+                                <div className="p-3 bg-teal-100 rounded-lg">
+                                    <Send className="w-6 h-6 text-teal-600" />
                                 </div>
                             </div>
                         </div>
@@ -296,7 +296,7 @@ const Funds = () => {
                                     placeholder="Search by purpose..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="pl-10 pr-4 py-2.5 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black"
+                                    className="pl-10 pr-4 py-2.5 w-full border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black"
                                 />
                             </div>
 
@@ -305,7 +305,7 @@ const Funds = () => {
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black appearance-none bg-white min-w-[180px]"
+                                    className="pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-black appearance-none bg-white min-w-[180px]"
                                 >
                                     <option value="All">All Statuses</option>
                                     <option value="Pending">Pending</option>
@@ -354,7 +354,7 @@ const Funds = () => {
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <button
                                                         onClick={() => setViewRequisition(req)}
-                                                        className="px-3 py-1.5 bg-purple-600 text-white text-sm font-semibold rounded-lg hover:bg-purple-700 flex items-center gap-1"
+                                                        className="px-3 py-1.5 bg-teal-600 text-white text-sm font-semibold rounded-lg hover:bg-teal-700 flex items-center gap-1"
                                                     >
                                                         <Eye className="w-4 h-4" />
                                                         View
@@ -377,7 +377,7 @@ const Funds = () => {
                                 <select
                                     value={historyFilter}
                                     onChange={(e) => setHistoryFilter(e.target.value)}
-                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-black text-sm"
+                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-black text-sm"
                                 >
                                     <option value="All">All Transactions</option>
                                     <option value="Approved">Approved Only</option>
@@ -388,7 +388,7 @@ const Funds = () => {
                                 <select
                                     value={historyPeriod}
                                     onChange={(e) => setHistoryPeriod(e.target.value)}
-                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-black text-sm"
+                                    className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-black text-sm"
                                 >
                                     <option value="all">All Time</option>
                                     <option value="day">Today</option>
@@ -406,7 +406,7 @@ const Funds = () => {
                                             value={historyFromDate}
                                             onChange={(e) => setHistoryFromDate(e.target.value)}
                                             onClick={(e) => e.target.showPicker?.()}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-black text-sm"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-black text-sm"
                                         />
                                     </div>
                                     <div className="flex-1">
@@ -416,7 +416,7 @@ const Funds = () => {
                                             value={historyToDate}
                                             onChange={(e) => setHistoryToDate(e.target.value)}
                                             onClick={(e) => e.target.showPicker?.()}
-                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-black text-sm"
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-black text-sm"
                                         />
                                     </div>
                                 </div>
@@ -474,9 +474,9 @@ const Funds = () => {
                                 </div>
                                 <div className="p-6">
                                     {/* Amount - Full Width */}
-                                    <div className="bg-purple-50 p-4 rounded-lg mb-4">
+                                    <div className="bg-teal-50 p-4 rounded-lg mb-4">
                                         <p className="text-sm text-gray-600 mb-1">Amount Requested</p>
-                                        <p className="text-3xl font-bold text-purple-600">{formatCurrency(viewRequisition.amount)}</p>
+                                        <p className="text-3xl font-bold text-teal-600">{formatCurrency(viewRequisition.amount)}</p>
                                     </div>
 
                                     {/* 2-Column Grid */}
@@ -597,7 +597,7 @@ const Funds = () => {
                                         {viewRequisition.status === 'Querying' && (
                                             <div className="mt-4">
                                                 {discussionMessage.text && (
-                                                    <div className={`mb-3 p-3 rounded ${discussionMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                                                    <div className={`mb-3 p-3 rounded ${discussionMessage.type === 'success' ? 'bg-teal-50 text-teal-800' : 'bg-red-50 text-red-800'}`}>
                                                         {discussionMessage.text}
                                                     </div>
                                                 )}
@@ -607,14 +607,14 @@ const Funds = () => {
                                                 <textarea
                                                     value={discussionContent}
                                                     onChange={(e) => setDiscussionContent(e.target.value)}
-                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-black resize-none"
+                                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 text-black resize-none"
                                                     rows="3"
                                                     placeholder="Type your reply here..."
                                                 />
                                                 <button
                                                     onClick={handleDiscuss}
                                                     disabled={isSubmittingDiscussion || !discussionContent.trim()}
-                                                    className="mt-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                                                    className="mt-2 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:opacity-50"
                                                 >
                                                     {isSubmittingDiscussion ? 'Posting...' : 'Post Reply'}
                                                 </button>
@@ -640,4 +640,4 @@ const Funds = () => {
     );
 };
 
-export default Funds;
+export default ParalegalFunds;

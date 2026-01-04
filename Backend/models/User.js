@@ -22,6 +22,10 @@ const userSchema = new mongoose.Schema({
         enum: ['Superadmin', 'Manager', 'HOC', 'Lawyer', 'Admin', 'Paralegal'],
         required: true
     },
+    approvalPin: {
+        type: String,
+        select: false  // Don't include in normal queries for security
+    },
     createdAt: {
         type: Date,
         default: Date.now
