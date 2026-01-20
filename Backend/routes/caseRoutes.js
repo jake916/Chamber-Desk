@@ -253,7 +253,8 @@ router.get('/:id', auth, async (req, res) => {
             .populate('client', 'name email phone address occupation dateOfBirth')
             .populate('assignedTo', 'name email')
             .populate('assignedLawyers', 'name email')
-            .populate('assignedParalegals', 'name email');
+            .populate('assignedParalegals', 'name email')
+            .populate('clientReports.author', 'name');
 
         if (!caseItem) {
             return res.status(404).json({ msg: 'Case not found' });

@@ -27,7 +27,7 @@ const fundRequisitionSchema = new mongoose.Schema({
     },
     status: {
         type: String,
-        enum: ['Pending', 'Assigned', 'Approved', 'Rejected'],
+        enum: ['Pending', 'Querying', 'Assigned', 'Approved', 'Rejected', 'Closed'],
         default: 'Pending'
     },
     assignedTo: {
@@ -39,6 +39,25 @@ const fundRequisitionSchema = new mongoose.Schema({
         ref: 'User'
     },
     managerComment: {
+        type: String,
+        trim: true
+    },
+    discussions: [{
+        author: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        content: {
+            type: String,
+            required: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
+    closureReason: {
         type: String,
         trim: true
     },

@@ -137,13 +137,37 @@ const ClientManagement = () => {
             {/* Stats Counters */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 {/* Total Clients */}
-                <div className={`bg-gradient-to-br from-${primaryColor}-50 to-${primaryColor}-100 rounded-xl p-6 border border-${primaryColor}-200`}>
+                <div className={
+                    userRole === 'Admin'
+                        ? 'bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200'
+                        : userRole === 'Manager'
+                            ? 'bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200'
+                            : 'bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200'
+                }>
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className={`text-sm font-medium text-${primaryColor}-600 mb-1`}>Total Clients</p>
-                            <p className={`text-3xl font-bold text-${primaryColor}-900`}>{totalClients}</p>
+                            <p className={
+                                userRole === 'Admin'
+                                    ? 'text-sm font-medium text-orange-600 mb-1'
+                                    : userRole === 'Manager'
+                                        ? 'text-sm font-medium text-blue-600 mb-1'
+                                        : 'text-sm font-medium text-purple-600 mb-1'
+                            }>Total Clients</p>
+                            <p className={
+                                userRole === 'Admin'
+                                    ? 'text-3xl font-bold text-orange-900'
+                                    : userRole === 'Manager'
+                                        ? 'text-3xl font-bold text-blue-900'
+                                        : 'text-3xl font-bold text-purple-900'
+                            }>{totalClients}</p>
                         </div>
-                        <div className={`p-3 bg-${primaryColor}-500 rounded-lg`}>
+                        <div className={
+                            userRole === 'Admin'
+                                ? 'p-3 bg-orange-500 rounded-lg'
+                                : userRole === 'Manager'
+                                    ? 'p-3 bg-blue-500 rounded-lg'
+                                    : 'p-3 bg-purple-500 rounded-lg'
+                        }>
                             <Users className="w-6 h-6 text-white" />
                         </div>
                     </div>

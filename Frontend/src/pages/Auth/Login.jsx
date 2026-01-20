@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Scale, Lock, Mail, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Scale, Lock, Mail, AlertCircle, ChevronDown, ChevronUp, Copy, Check } from 'lucide-react';
 import API_BASE_URL from '../../config/api';
 
 const Login = () => {
@@ -10,6 +10,8 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [showTestCredentials, setShowTestCredentials] = useState(false);
+    const [copiedField, setCopiedField] = useState('');
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -46,9 +48,6 @@ const Login = () => {
             else if (role === 'admin') redirectPath = '/admin';
             else if (role === 'paralegal') redirectPath = '/paralegal';
 
-            // For now, we'll just alert, but in real app use navigate(redirectPath)
-            // For now, we'll just alert, but in real app use navigate(redirectPath)
-            // alert(`Login Successful! Redirecting to ${redirectPath}`);
             navigate(redirectPath);
 
         } catch (err) {
@@ -58,14 +57,26 @@ const Login = () => {
         }
     };
 
-    const roleExamples = [
-        { role: 'Super Admin', email: 'super@chamberdesk.com' },
-        { role: 'Manager', email: 'manager@chamberdesk.com' },
-        { role: 'Head of Chambers', email: 'hoc@chamberdesk.com' },
-        { role: 'Lawyer', email: 'lawyer@chamberdesk.com' },
-        { role: 'Admin', email: 'admin@chamberdesk.com' },
-        { role: 'Paralegal', email: 'para@chamberdesk.com' },
+    const testCredentials = [
+        { role: 'Super Admin', email: 'super@chamberdesk.com', password: 'password123' },
+        { role: 'Manager', email: 'manager@chamberdesk.com', password: 'password123' },
+        { role: 'Head of Chambers', email: 'hoc@chamberdesk.com', password: 'password123' },
+        { role: 'Lawyer', email: 'lawyer@chamberdesk.com', password: 'password123' },
+        { role: 'Admin', email: 'admin@chamberdesk.com', password: 'password123' },
+        { role: 'Paralegal', email: 'para@chamberdesk.com', password: 'password123' },
     ];
+
+    const handleCopyToClipboard = (text, field) => {
+        navigator.clipboard.writeText(text);
+        setCopiedField(field);
+        setTimeout(() => setCopiedField(''), 2000);
+    };
+
+    const handleQuickLogin = (credential) => {
+        setEmail(credential.email);
+        setPassword(credential.password);
+        setShowTestCredentials(false);
+    };
 
     return (
         <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
@@ -87,6 +98,99 @@ const Login = () => {
                         <p className="text-sm text-red-800">{error}</p>
                     </div>
                 )}
+
+                {/* Test Credentials Dropdown */}
+                <div className="mb-6">
+                    <button
+                        type="button"
+                        onClick={() => setShowTestCredentials(!showTestCredentials)}
+                        className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-2 border-amber-200 rounded-lg hover:border-amber-300 transition-all group"
+                    >
+                        <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                            <span className="text-sm font-semibold text-amber-900">
+                                Test Login Credentials
+                            </span>
+                        </div>
+                        {showTestCredentials ? (
+                            <ChevronUp className="w-5 h-5 text-amber-700 group-hover:text-amber-900 transition-colors" />
+                        ) : (
+                            <ChevronDown className="w-5 h-5 text-amber-700 group-hover:text-amber-900 transition-colors" />
+                        )}
+                    </button>
+
+                    {showTestCredentials && (
+                        <div className="mt-3 p-4 bg-white border-2 border-amber-100 rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                            <p className="text-xs text-gray-600 mb-4 italic">
+                                Click on any credential to auto-fill the login form
+                            </p>
+                            <div className="space-y-3">
+                                {testCredentials.map((credential, index) => (
+                                    <div
+                                        key={index}
+                                        className="p-3 bg-gradient-to-br from-gray-50 to-slate-50 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer group"
+                                        onClick={() => handleQuickLogin(credential)}
+                                    >
+                                        <div className="flex items-center justify-between mb-2">
+                                            <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                {credential.role}
+                                            </h4>
+                                            <span className="text-xs text-gray-500 group-hover:text-blue-500">
+                                                Click to use
+                                            </span>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-gray-500 mb-1">Email</p>
+                                                    <p className="text-xs font-mono text-gray-700 bg-white px-2 py-1 rounded border border-gray-200">
+                                                        {credential.email}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCopyToClipboard(credential.email, `email-${index}`);
+                                                    }}
+                                                    className="p-1.5 hover:bg-blue-50 rounded transition-colors"
+                                                    title="Copy email"
+                                                >
+                                                    {copiedField === `email-${index}` ? (
+                                                        <Check className="w-4 h-4 text-green-600" />
+                                                    ) : (
+                                                        <Copy className="w-4 h-4 text-gray-400 hover:text-blue-600" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                            <div className="flex items-center justify-between gap-2">
+                                                <div className="flex-1">
+                                                    <p className="text-xs text-gray-500 mb-1">Password</p>
+                                                    <p className="text-xs font-mono text-gray-700 bg-white px-2 py-1 rounded border border-gray-200">
+                                                        {credential.password}
+                                                    </p>
+                                                </div>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleCopyToClipboard(credential.password, `password-${index}`);
+                                                    }}
+                                                    className="p-1.5 hover:bg-blue-50 rounded transition-colors"
+                                                    title="Copy password"
+                                                >
+                                                    {copiedField === `password-${index}` ? (
+                                                        <Check className="w-4 h-4 text-green-600" />
+                                                    ) : (
+                                                        <Copy className="w-4 h-4 text-gray-400 hover:text-blue-600" />
+                                                    )}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <div className="space-y-6">
                     <div>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, User, Calendar, CheckCircle, XCircle, Clock, Send, Plus, Search, Filter, Eye, MessageCircle } from 'lucide-react';
+import { DollarSign, User, Calendar, CheckCircle, XCircle, Clock, Send, Plus, Search, Filter, Eye, MessageCircle, AlertCircle } from 'lucide-react';
 import API_BASE_URL from '../../config/api';
 
-const FundRequisitionList = () => {
+const ManagerFunds = () => {
     const navigate = useNavigate();
     const [requisitions, setRequisitions] = useState([]);
     const [users, setUsers] = useState([]);
@@ -43,10 +43,25 @@ const FundRequisitionList = () => {
     const [closeReason, setCloseReason] = useState('');
     const [isSubmittingQuery, setIsSubmittingQuery] = useState(false);
 
+    // PIN states
+    const [hasApprovalPin, setHasApprovalPin] = useState(false);
+    const [showPinCreationModal, setShowPinCreationModal] = useState(false);
+    const [pinCreationData, setPinCreationData] = useState({
+        email: '',
+        pin: '',
+        confirmPin: ''
+    });
+    const [pinCreationMessage, setPinCreationMessage] = useState({ type: '', text: '' });
+    const [isCreatingPin, setIsCreatingPin] = useState(false);
+    const [approvalPin, setApprovalPin] = useState('');
+
     useEffect(() => {
         fetchRequisitions();
         fetchUsers();
         fetchManagers();
+        if (userRole === 'Manager') {
+            checkApprovalPinStatus();
+        }
     }, []);
 
     const fetchRequisitions = async () => {
@@ -108,6 +123,63 @@ const FundRequisitionList = () => {
         }
     };
 
+    const checkApprovalPinStatus = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/auth/has-approval-pin`, {
+                headers: { 'x-auth-token': token }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setHasApprovalPin(data.hasPin);
+            }
+        } catch (err) {
+            console.error('Error checking PIN status:', err);
+        }
+    };
+
+    const handleCreatePin = async () => {
+        if (!pinCreationData.email || !pinCreationData.pin || !pinCreationData.confirmPin) {
+            setPinCreationMessage({ type: 'error', text: 'Please fill all fields' });
+            return;
+        }
+
+        setIsCreatingPin(true);
+        setPinCreationMessage({ type: '', text: '' });
+
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${API_BASE_URL}/api/auth/create-approval-pin`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token
+                },
+                body: JSON.stringify(pinCreationData)
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.msg || 'Failed to create PIN');
+            }
+
+            setPinCreationMessage({ type: 'success', text: 'PIN created successfully!' });
+            setTimeout(() => {
+                setShowPinCreationModal(false);
+                setPinCreationData({ email: '', pin: '', confirmPin: '' });
+                setPinCreationMessage({ type: '', text: '' });
+                setHasApprovalPin(true);
+            }, 1500);
+
+        } catch (err) {
+            setPinCreationMessage({ type: 'error', text: err.message });
+        } finally {
+            setIsCreatingPin(false);
+        }
+    };
+
     const handleAssign = async () => {
         if (!selectedManager) {
             setAssignMessage({ type: 'error', text: 'Please select a manager' });
@@ -148,6 +220,12 @@ const FundRequisitionList = () => {
     };
 
     const handleApproveReject = async (status) => {
+        // Validate PIN is provided
+        if (!approvalPin) {
+            setActionMessage({ type: 'error', text: 'Please enter your approval PIN' });
+            return;
+        }
+
         setIsProcessing(true);
         setActionMessage({ type: '', text: '' });
 
@@ -159,7 +237,7 @@ const FundRequisitionList = () => {
                     'Content-Type': 'application/json',
                     'x-auth-token': token
                 },
-                body: JSON.stringify({ status })
+                body: JSON.stringify({ status, pin: approvalPin })
             });
 
             if (!response.ok) {
@@ -175,11 +253,13 @@ const FundRequisitionList = () => {
             setTimeout(() => {
                 setViewRequisition(null);
                 setActionMessage({ type: '', text: '' });
+                setApprovalPin(''); // Clear PIN after use
                 fetchRequisitions();
             }, 1500);
 
         } catch (err) {
             setActionMessage({ type: 'error', text: err.message });
+            setApprovalPin(''); // Clear PIN on error
         } finally {
             setIsProcessing(false);
         }
@@ -472,6 +552,27 @@ const FundRequisitionList = () => {
                 )}
             </div>
 
+            {/* PIN Creation Banner */}
+            {userRole === 'Manager' && !hasApprovalPin && (
+                <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                            <h3 className="font-semibold text-amber-900">Approval PIN Required</h3>
+                            <p className="text-sm text-amber-800 mt-1">
+                                You need to create an approval PIN to approve or reject fund requisitions.
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setShowPinCreationModal(true)}
+                            className="px-4 py-2 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 flex-shrink-0"
+                        >
+                            Create PIN
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Stats Counter Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-7 gap-4 mb-6">
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -530,11 +631,11 @@ const FundRequisitionList = () => {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-sm text-gray-600 mb-1">Assigned</p>
-                            <p className="text-2xl font-bold text-purple-600">{assignedCount}</p>
+                            <p className="text-2xl font-bold text-blue-600">{assignedCount}</p>
                             <p className="text-xs text-gray-500 mt-1">{formatCurrency(assignedAmount)}</p>
                         </div>
-                        <div className="p-3 bg-purple-100 rounded-lg">
-                            <Send className="w-6 h-6 text-purple-600" />
+                        <div className="p-3 bg-blue-100 rounded-lg">
+                            <Send className="w-6 h-6 text-blue-600" />
                         </div>
                     </div>
                 </div>
@@ -1038,8 +1139,8 @@ const FundRequisitionList = () => {
                                     ))}
                                 </div>
 
-                                {/* Add Comment (Admin only, not for Closed status) */}
-                                {userRole === 'Admin' && viewRequisition.status !== 'Closed' && (
+                                {/* Add Comment (Admin or assigned Manager, not for Closed status) */}
+                                {((userRole === 'Admin') || (userRole === 'Manager' && viewRequisition.assignedTo && (viewRequisition.assignedTo._id === userId || viewRequisition.assignedTo === userId))) && viewRequisition.status !== 'Closed' && (
                                     <div className="mt-4">
                                         <label className="block text-sm font-medium text-gray-700 mb-2">
                                             Add Comment
@@ -1047,14 +1148,14 @@ const FundRequisitionList = () => {
                                         <textarea
                                             value={discussionContent}
                                             onChange={(e) => setDiscussionContent(e.target.value)}
-                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-black resize-none"
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black resize-none"
                                             rows="3"
                                             placeholder="Type your comment here..."
                                         />
                                         <button
                                             onClick={handleDiscuss}
                                             disabled={isSubmittingQuery || !discussionContent.trim()}
-                                            className="mt-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+                                            className="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                                         >
                                             {isSubmittingQuery ? 'Posting...' : 'Post Comment'}
                                         </button>
@@ -1090,7 +1191,7 @@ const FundRequisitionList = () => {
                                             </button>
                                             <button
                                                 onClick={() => setSelectedRequisition(viewRequisition)}
-                                                className="flex-1 min-w-[120px] px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700"
+                                                className="flex-1 min-w-[120px] px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700"
                                             >
                                                 Assign to Manager
                                             </button>
@@ -1120,28 +1221,42 @@ const FundRequisitionList = () => {
                                 viewRequisition.assignedTo &&
                                 (viewRequisition.assignedTo._id === userId || viewRequisition.assignedTo === userId) &&
                                 viewRequisition.status === 'Assigned' ? (
-                                <div className="flex gap-3">
-                                    <button
-                                        onClick={() => setViewRequisition(null)}
-                                        className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
-                                        disabled={isProcessing}
-                                    >
-                                        Cancel
-                                    </button>
-                                    <button
-                                        onClick={() => handleApproveReject('Rejected')}
-                                        disabled={isProcessing}
-                                        className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50"
-                                    >
-                                        {isProcessing ? 'Processing...' : 'Deny'}
-                                    </button>
-                                    <button
-                                        onClick={() => handleApproveReject('Approved')}
-                                        disabled={isProcessing}
-                                        className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50"
-                                    >
-                                        {isProcessing ? 'Processing...' : 'Accept'}
-                                    </button>
+                                <div>
+                                    {/* PIN Input */}
+                                    <div className="mb-4">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Approval PIN <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={approvalPin}
+                                            onChange={(e) => setApprovalPin(e.target.value)}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-black"
+                                            placeholder="Enter your approval PIN"
+                                            maxLength="6"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            Enter your 4-6 digit approval PIN to approve or reject this requisition.
+                                        </p>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="flex gap-3">
+                                        <button
+                                            onClick={() => handleApproveReject('Rejected')}
+                                            disabled={isProcessing}
+                                            className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50"
+                                        >
+                                            {isProcessing ? 'Processing...' : 'Reject'}
+                                        </button>
+                                        <button
+                                            onClick={() => handleApproveReject('Approved')}
+                                            disabled={isProcessing}
+                                            className="flex-1 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 disabled:opacity-50"
+                                        >
+                                            {isProcessing ? 'Processing...' : 'Accept'}
+                                        </button>
+                                    </div>
                                 </div>
                             ) : (
                                 <button
@@ -1198,53 +1313,142 @@ const FundRequisitionList = () => {
                         </div>
                     </div>
                 </div>
-            )}
+            )
+            }
 
-            {/* Close Requisition Modal */}
-            {showCloseModal && (
-                <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
-                        <div className="p-6 border-b border-gray-200">
-                            <h3 className="text-xl font-bold text-gray-900">Close Requisition</h3>
-                        </div>
-                        <div className="p-6">
-                            <p className="text-sm text-gray-600 mb-4">
-                                Provide a reason for closing this requisition. The requester will be notified.
-                            </p>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Closure Reason <span className="text-red-500">*</span>
-                            </label>
-                            <textarea
-                                value={closeReason}
-                                onChange={(e) => setCloseReason(e.target.value)}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-black resize-none"
-                                rows="4"
-                                placeholder="Explain why this requisition is being closed..."
-                            />
-                        </div>
-                        <div className="p-6 border-t border-gray-200 flex gap-3">
-                            <button
-                                onClick={() => {
-                                    setShowCloseModal(false);
-                                    setCloseReason('');
-                                }}
-                                className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleClose}
-                                disabled={isSubmittingQuery || !closeReason.trim()}
-                                className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50"
-                            >
-                                {isSubmittingQuery ? 'Closing...' : 'Close Requisition'}
-                            </button>
+            {/* PIN Creation Modal */}
+            {
+                showPinCreationModal && (
+                    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+                            <div className="p-6 border-b border-gray-200">
+                                <h3 className="text-xl font-bold text-gray-900">Create Approval PIN</h3>
+                            </div>
+                            <div className="p-6">
+                                {pinCreationMessage.text && (
+                                    <div className={`mb-4 p-3 rounded ${pinCreationMessage.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                                        {pinCreationMessage.text}
+                                    </div>
+                                )}
+
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Create a 4-6 digit PIN that you'll use to approve or reject fund requisitions.
+                                </p>
+
+                                <div className="space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Email <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={pinCreationData.email}
+                                            onChange={(e) => setPinCreationData({ ...pinCreationData, email: e.target.value })}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-black"
+                                            placeholder="Enter your email"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            PIN (4-6 digits) <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={pinCreationData.pin}
+                                            onChange={(e) => setPinCreationData({ ...pinCreationData, pin: e.target.value })}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-black"
+                                            placeholder="Enter 4-6 digit PIN"
+                                            maxLength="6"
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Confirm PIN <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={pinCreationData.confirmPin}
+                                            onChange={(e) => setPinCreationData({ ...pinCreationData, confirmPin: e.target.value })}
+                                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-black"
+                                            placeholder="Confirm your PIN"
+                                            maxLength="6"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="p-6 border-t border-gray-200 flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        setShowPinCreationModal(false);
+                                        setPinCreationData({ email: '', pin: '', confirmPin: '' });
+                                        setPinCreationMessage({ type: '', text: '' });
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleCreatePin}
+                                    disabled={isCreatingPin}
+                                    className="flex-1 px-4 py-2 bg-amber-600 text-white font-semibold rounded-lg hover:bg-amber-700 disabled:opacity-50"
+                                >
+                                    {isCreatingPin ? 'Creating...' : 'Create PIN'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+
+            {/* Close Requisition Modal */}
+            {
+                showCloseModal && (
+                    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-md w-full">
+                            <div className="p-6 border-b border-gray-200">
+                                <h3 className="text-xl font-bold text-gray-900">Close Requisition</h3>
+                            </div>
+                            <div className="p-6">
+                                <p className="text-sm text-gray-600 mb-4">
+                                    Provide a reason for closing this requisition. The requester will be notified.
+                                </p>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Closure Reason <span className="text-red-500">*</span>
+                                </label>
+                                <textarea
+                                    value={closeReason}
+                                    onChange={(e) => setCloseReason(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-black resize-none"
+                                    rows="4"
+                                    placeholder="Explain why this requisition is being closed..."
+                                />
+                            </div>
+                            <div className="p-6 border-t border-gray-200 flex gap-3">
+                                <button
+                                    onClick={() => {
+                                        setShowCloseModal(false);
+                                        setCloseReason('');
+                                    }}
+                                    className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleClose}
+                                    disabled={isSubmittingQuery || !closeReason.trim()}
+                                    className="flex-1 px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 disabled:opacity-50"
+                                >
+                                    {isSubmittingQuery ? 'Closing...' : 'Close Requisition'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div >
     );
 };
 
-export default FundRequisitionList;
+export default ManagerFunds;

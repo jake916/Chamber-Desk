@@ -132,11 +132,11 @@ const Broadcast = () => {
                     <p className="text-gray-600 mt-1">View important announcements and updates from management</p>
                 </div>
 
-                {/* Create Broadcast Button - Manager Only */}
-                {userRole === 'Manager' && (
+                {/* Create Broadcast Button - Manager, Admin, and HOC */}
+                {['Manager', 'Admin', 'HOC'].includes(userRole) && (
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className={`flex items-center gap-2 px-4 py-2 bg-${primaryColor}-600 text-white rounded-lg hover:bg-${primaryColor}-700 transition-colors`}
                     >
                         <Plus className="w-5 h-5" />
                         Create Broadcast
@@ -144,8 +144,8 @@ const Broadcast = () => {
                 )}
             </div>
 
-            {/* Manager View - Two Sections */}
-            {userRole === 'Manager' ? (
+            {/* Manager, Admin, and HOC View - Two Sections */}
+            {['Manager', 'Admin', 'HOC'].includes(userRole) ? (
                 <div className="space-y-8">
                     {/* My Broadcasts Section */}
                     <div>
@@ -188,7 +188,7 @@ const Broadcast = () => {
                     </div>
                 </div>
             ) : (
-                /* Non-Manager View - Single Section */
+                /* Non-Manager/Admin/HOC View - Single Section */
                 <div className="grid gap-4">
                     {broadcasts.length === 0 ? (
                         <div className="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-200">

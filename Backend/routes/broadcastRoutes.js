@@ -34,9 +34,9 @@ router.post('/', auth, async (req, res) => {
             return res.status(404).json({ msg: 'User not found' });
         }
 
-        // Check if user is a Manager
-        if (currentUser.role !== 'Manager') {
-            return res.status(403).json({ msg: 'Only Managers can create broadcasts' });
+        // Check if user is a Manager, Admin, or HOC
+        if (!['Manager', 'Admin', 'HOC'].includes(currentUser.role)) {
+            return res.status(403).json({ msg: 'Only Managers, Admins, and HOC can create broadcasts' });
         }
 
         // Validate input

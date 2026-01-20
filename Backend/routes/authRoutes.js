@@ -75,6 +75,148 @@ router.get('/users', auth, async (req, res) => {
     }
 });
 
+// @route   POST /api/auth/create-approval-pin
+// @desc    Create approval PIN for Manager
+// @access  Private (Manager only)
+router.post('/create-approval-pin', auth, async (req, res) => {
+    const { email, pin, confirmPin } = req.body;
+
+    try {
+        // Check if user is Manager
+        if (req.user.role !== 'Manager') {
+            return res.status(403).json({ msg: 'Access denied. Manager only.' });
+        }
+
+        // Validate inputs
+        if (!email || !pin || !confirmPin) {
+            return res.status(400).json({ msg: 'Please provide all fields' });
+        }
+
+        // Get user with PIN field
+        const user = await User.findById(req.user.id).select('+approvalPin');
+
+        // Check if email matches
+        if (user.email !== email.toLowerCase().trim()) {
+            return res.status(400).json({ msg: 'Email does not match your account' });
+        }
+
+        // Check if user already has a PIN
+        if (user.approvalPin) {
+            return res.status(400).json({ msg: 'You already have an approval PIN' });
+        }
+
+        // Validate PIN format (4-6 digits)
+        const pinRegex = /^\d{4,6}$/;
+        if (!pinRegex.test(pin)) {
+            return res.status(400).json({ msg: 'PIN must be 4-6 digits' });
+        }
+
+        // Check if PIN and confirmPin match
+        if (pin !== confirmPin) {
+            return res.status(400).json({ msg: 'PINs do not match' });
+        }
+
+        // Hash the PIN
+        const salt = await bcrypt.genSalt(10);
+        user.approvalPin = await bcrypt.hash(pin, salt);
+
+        await user.save();
+
+        res.json({ msg: 'Approval PIN created successfully' });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   POST /api/auth/verify-approval-pin
+// @desc    Verify approval PIN
+// @access  Private (Manager only)
+router.post('/verify-approval-pin', auth, async (req, res) => {
+    const { pin } = req.body;
+
+    try {
+        // Check if user is Manager
+        if (req.user.role !== 'Manager') {
+            return res.status(403).json({ msg: 'Access denied. Manager only.' });
+        }
+
+        if (!pin) {
+            return res.status(400).json({ msg: 'Please provide PIN' });
+        }
+
+        // Get user with PIN field
+        const user = await User.findById(req.user.id).select('+approvalPin');
+
+        if (!user.approvalPin) {
+            return res.status(400).json({ msg: 'No approval PIN set. Please create one first.' });
+        }
+
+        // Verify PIN
+        const isMatch = await bcrypt.compare(pin, user.approvalPin);
+
+        res.json({ valid: isMatch });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   GET /api/auth/has-approval-pin
+// @desc    Check if user has approval PIN
+// @access  Private (Manager only)
+router.get('/has-approval-pin', auth, async (req, res) => {
+    try {
+        // Check if user is Manager
+        if (req.user.role !== 'Manager') {
+            return res.status(403).json({ msg: 'Access denied. Manager only.' });
+        }
+
+        // Get user with PIN field
+        const user = await User.findById(req.user.id).select('+approvalPin');
+
+        res.json({ hasPin: !!user.approvalPin });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   PUT /api/auth/reset-approval-pin/:userId
+// @desc    Reset approval PIN (Superadmin only)
+// @access  Private (Superadmin only)
+router.put('/reset-approval-pin/:userId', auth, async (req, res) => {
+    try {
+        // Check if user is Superadmin
+        if (req.user.role !== 'Superadmin') {
+            return res.status(403).json({ msg: 'Access denied. Superadmin only.' });
+        }
+
+        const user = await User.findById(req.params.userId).select('+approvalPin');
+
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Check if user is a Manager
+        if (user.role !== 'Manager') {
+            return res.status(400).json({ msg: 'Can only reset PIN for Managers' });
+        }
+
+        user.approvalPin = undefined;
+        await user.save();
+
+        res.json({ msg: 'Approval PIN reset successfully' });
+
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;
 
 // Updated to allow Admin Officer access
