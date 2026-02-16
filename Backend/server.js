@@ -8,8 +8,22 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        return callback(null, true); // Allow all origins for now to fix the issue
+    },
+    credentials: true
+}));
 app.use(express.json());
+
+// Log all requests for debugging
+app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url}`);
+    console.log('Origin:', req.headers.origin);
+    next();
+});
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)
