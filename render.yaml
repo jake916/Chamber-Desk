@@ -30,10 +30,9 @@ services:
       - key: SUPABASE_SERVICE_KEY
         sync: false
 
+staticSites:
   # Frontend Static Site
-  - type: static
-    name: chamber-desk-frontend
-    env: static
+  - name: chamber-desk-frontend
     root: Frontend
     region: ohio
     plan: free
