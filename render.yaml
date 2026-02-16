@@ -3,7 +3,7 @@ services:
   - type: web
     name: chamber-desk-backend
     env: node
-    root: Backend
+    rootDir: Backend
     region: ohio
     plan: free
     buildCommand: npm install
@@ -30,14 +30,15 @@ services:
       - key: SUPABASE_SERVICE_KEY
         sync: false
 
-staticSites:
   # Frontend Static Site
-  - name: chamber-desk-frontend
-    root: Frontend
+  - type: web
+    name: chamber-desk-frontend
+    env: static
+    rootDir: Frontend
     region: ohio
     plan: free
     buildCommand: npm install && npm run build
-    publishDir: dist
+    staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
         fromService:
