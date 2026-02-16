@@ -102,7 +102,7 @@ const RoleSidebar = ({ role = 'admin', navigationItems = [], unreadNotifications
             <div className={`p-6 border-b ${colors.border}`}>
                 <h1 className="text-xl font-bold flex items-center gap-2">
                     <Scale className={`w-6 h-6 ${colors.text}`} />
-                    Chamber Desk
+                    FirmDesk
                 </h1>
                 <p className={`text-xs ${colors.text} mt-1`}>{colors.portalName}</p>
             </div>

@@ -89,7 +89,7 @@ const Login = () => {
             <div className="relative z-10 w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 md:p-12">
                 <div className="text-center mb-8">
                     <h2 className="text-[30px] font-black text-gray-900 mb-2">Welcome Back</h2>
-                    <p className="text-gray-600">Sign in to Chamber Desk</p>
+                    <p className="text-gray-600">Sign in to Firm Desk</p>
                 </div>
 
                 {error && (
@@ -206,7 +206,7 @@ const Login = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all text-black"
-                                placeholder="your.email@chamberdesk.com"
+                                placeholder="your.email@firmdesk.com"
                                 required
                             />
                         </div>
